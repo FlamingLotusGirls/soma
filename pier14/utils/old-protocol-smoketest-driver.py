@@ -45,53 +45,55 @@ crcTable = [
 	0xe6, 0xe1, 0xe8, 0xef, 0xfa, 0xfd, 0xf4, 0xf3,
 ]
 
-def serial_write(buf):
-    global ser
+def serial_write(ser, buf):
     buf = [ chr(x) for x in buf ]
     out = ''.join(buf)
     print "Writing", len(out), "length packet:", repr(buf)
-    if ser:
-        ser.write(out)
+    ser.write(out)
 
-def send_short(addr, command, value):
+def send_short(ser, addr, command, value):
     crc = 0
     crc = crcTable[crc ^ addr]
     crc = crcTable[crc ^ command]
     crc = crcTable[crc ^ value]
-    serial_write([ PROTO_SOF, addr, command, value, crc, PROTO_EOF ])
+    serial_write(ser, [ PROTO_SOF, addr, command, value, crc, PROTO_EOF ])
 
-def send_long(addr, *data):
+def send_long(ser, addr, *data):
     assert len(data) > 0
     assert len(data) % 4 == 0
-    serial_write([ PROTO_SOF_LONG, addr, 0, len(data)/4 ] + list(data) + [ PROTO_EOF ])
+    serial_write(ser, [ PROTO_SOF_LONG, addr, 0, len(data)/4 ] + list(data) + [ PROTO_EOF ])
 
 
 # Color sequence
 sequence = [
-        (255,   0,   0,  0),
-        (  0, 255,   0,  0),
-        (  0,   0, 255,  0),
-        #(  0,   0,   0,  0),
+        (  0,   0,   0,  0),
+        (  1,   0,   0,  0),
+        (  0,   1,   0,  0),
+        (  0,   0,   1,  0),
     ]
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        device = sys.argv[1]
+    if len(sys.argv) <= 1:
+        print "Usage: %s <device> [baud]" % sys.argv[0]
+        sys.exit(1)
+
+    device = sys.argv[1]
+
+    if len(sys.argv) >= 2:
         baud = int(sys.argv[2]) if len(sys.argv) > 2 else 115200*2
-        ser = serial.Serial(device, baud)
-    else:
-        ser = False
+
+    ser = serial.Serial(device, baud)
 
     if False:
         # set everything to bright white
-        send_long(0, *((255,255,255,0)*80))
-        send_short(PROTO_ADDR_BCAST, PROTO_CMD_SYNC, 0)
+        send_long(ser, 0, *((255,255,255,0)*80))
+        send_short(ser, PROTO_ADDR_BCAST, PROTO_CMD_SYNC, 0)
 
     else:
         # Cycle through the colors in the "sequence" variable
         while True:
             for color in sequence:
-                send_long(0, *(color*80))
-                send_short(PROTO_ADDR_BCAST, PROTO_CMD_SYNC, 0)
+                send_long(ser, 0, *(color*80))
+                send_short(ser, PROTO_ADDR_BCAST, PROTO_CMD_SYNC, 0)
                 print
-                time.sleep(0.25);
+                time.sleep(1);

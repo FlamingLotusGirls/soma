@@ -11,7 +11,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- * Copyright 2013 Michael C. Toren <mct@toren.net>
+ * Copyright 2013-2014 Michael C. Toren <mct@toren.net>
  */
 
 #include <stdio.h>
@@ -31,13 +31,31 @@
 #define CNEW_RTSCTS CRTSCTS
 #endif
 
+// For the old protocol
 #define PROTO_SOF        'S'
 #define PROTO_SOF_LONG   'T'
 #define PROTO_EOF        'E'
 #define PROTO_CMD_SYNC   0x80
 #define PROTO_ADDR_BCAST 0xFF
 
-#define MAX_LEDS 1000
+// For the new protocol
+enum {
+    FRAME_END   = 0xDA,
+    FRAME_ESC   = 0xDB,
+    FRAME_TEND  = 0xDC,
+    FRAME_TESC  = 0xDD,
+};
+
+enum {
+    PROTO_CMD_NOOP      = 0x11,
+    PROTO_CMD_BAUD      = 0x12,
+    PROTO_CMD_LATCH     = 0x13,
+    PROTO_CMD_RGBDATA   = 0x14,
+    PROTO_CMD_RGBLATCH  = 0x15,
+};
+
+#define MAX_LEDS 250
+#define BUF_SIZE (MAX_LEDS*4)
 
 struct {
     uint8_t addr;
@@ -47,8 +65,9 @@ struct {
 int num_leds;
 
 uint16_t port = OPC_DEFAULT_PORT;
-uint32_t baud = 115200*2;
+uint32_t baud = 230400; // 115200*2
 char *device, *config;
+int old_proto;
 int fd;
 
 opc_source source = -1;
@@ -152,7 +171,7 @@ int serial_open(char *device, uint32_t baud)
     return fd;
 }
 
-void serial_write(char *buf, size_t count)
+void serial_write(uint8_t *buf, size_t count)
 {
     ssize_t n = write(fd, buf, count);
 
@@ -167,9 +186,9 @@ void serial_write(char *buf, size_t count)
     }
 }
 
-void send_short_packet(uint8_t addr, uint8_t command, uint8_t value)
+void send_old_short_packet(uint8_t addr, uint8_t command, uint8_t value)
 {
-    char buf[2048];
+    uint8_t buf[2048];
     int buf_len = 0;
     uint8_t crc = 0;
 
@@ -187,9 +206,9 @@ void send_short_packet(uint8_t addr, uint8_t command, uint8_t value)
     serial_write(buf, buf_len);
 }
 
-void send_long_packet(uint8_t addr, uint8_t words, char *data)
+void send_old_long_packet(uint8_t addr, uint8_t words, uint8_t *data)
 {
-    char buf[2048];
+    uint8_t buf[2048];
     int buf_len = 0;
 
     buf[buf_len++] = PROTO_SOF_LONG;
@@ -204,9 +223,72 @@ void send_long_packet(uint8_t addr, uint8_t words, char *data)
     serial_write(buf, buf_len);
 }
 
+int escape(uint8_t *src, int src_len, uint8_t *dst)
+{
+    int dst_len = 0;
+    int i;
+
+    for (i = 0; i < src_len; i++) {
+        switch (src[i]) {
+            case FRAME_END:
+                dst[dst_len++] = FRAME_ESC;
+                dst[dst_len++] = FRAME_TEND;
+                break;
+
+            case FRAME_ESC:
+                dst[dst_len++] = FRAME_ESC;
+                dst[dst_len++] = FRAME_TESC;
+                break;
+
+            default:
+                dst[dst_len++] = src[i];
+                break;
+        }
+    }
+
+    return dst_len;
+}
+
+uint8_t calc_crc(uint8_t *p, int len)
+{
+    uint8_t crc = 0;
+    int i;
+
+    for (i = 0; i < len; i++)
+        crc = crc8_table[crc ^ p[i]];
+
+    return crc;
+}
+
+void send_rgblatch(uint8_t addr, uint8_t num_colors, uint8_t *data)
+{
+    uint8_t buf[BUF_SIZE];
+    uint8_t escaped_buf[BUF_SIZE*2];
+
+    int buf_len = 0;
+    int escaped_buf_len = 0;
+
+    uint8_t crc;
+
+    buf[buf_len++] = addr;                      // addr
+    buf[buf_len++] = PROTO_CMD_RGBLATCH;        // type
+    buf[buf_len++] = num_colors;                // num_colors
+
+    // color tuples
+    memcpy(buf + buf_len, data, num_colors*3);
+    buf_len += num_colors*3;
+
+    crc = calc_crc(buf, buf_len);
+    buf[buf_len++] = crc;
+
+    escaped_buf_len = escape(buf, buf_len, escaped_buf);
+    escaped_buf[escaped_buf_len++] = FRAME_END;
+    serial_write(escaped_buf, escaped_buf_len);
+}
+
 void refresh()
 {
-    char buf[2048];
+    uint8_t buf[BUF_SIZE];
     int buf_len;
 
     int first = 1;
@@ -217,8 +299,13 @@ void refresh()
 
     for (i = 0; i < num_leds; i++) {
         if (first || last_addr + 1 != leds[i].addr) {
-            if (!first)
-                send_long_packet(base_addr, buf_len/4, buf);
+            if (!first) {
+                if (old_proto)
+                    send_old_long_packet(base_addr, buf_len/4, buf);
+                else
+                    send_rgblatch(base_addr, buf_len/3, buf);
+            }
+
             base_addr = leds[i].addr;
             buf_len = 0;
         }
@@ -226,14 +313,21 @@ void refresh()
         buf[buf_len++] = leds[i].p.r;
         buf[buf_len++] = leds[i].p.g;
         buf[buf_len++] = leds[i].p.b;
-        buf[buf_len++] = 0;
+
+        if (old_proto)
+            buf[buf_len++] = 0;
 
         last_addr = leds[i].addr;
         first = 0;
     }
 
-    send_long_packet(base_addr, buf_len/4, buf);
-    send_short_packet(PROTO_ADDR_BCAST, PROTO_CMD_SYNC, 0);
+    if (old_proto) {
+        send_old_long_packet(base_addr, buf_len/4, buf);
+        send_old_short_packet(PROTO_ADDR_BCAST, PROTO_CMD_SYNC, 0);
+    }
+    else {
+        send_rgblatch(base_addr, buf_len/3, buf);
+    }
 }
 
 void handler(u8 channel, u16 count, pixel* p) {
@@ -323,15 +417,17 @@ int main(int argc, char *argv[])
     int c;
 
     struct option long_options[] = {
-        { "line",   required_argument,  NULL, 'l' },
-        { "baud",   required_argument,  NULL, 's' },
-        { "speed",  required_argument,  NULL, 's' },
-        { "file",   required_argument,  NULL, 'f' },
-        { "port",   required_argument,  NULL, 'p' },
+        { "line",          required_argument,  NULL, 'l' },
+        { "baud",          required_argument,  NULL, 's' },
+        { "speed",         required_argument,  NULL, 's' },
+        { "file",          required_argument,  NULL, 'f' },
+        { "port",          required_argument,  NULL, 'p' },
+        { "old_proto",     no_argument,        NULL, 'o' },
+        { "old_protocol",  no_argument,        NULL, 'o' },
         { 0, 0, 0, 0}
     };
 
-    char *optstring = "l:s:f:p:";
+    char *optstring = "l:s:f:p:o";
 
     while (1) {
         c = getopt_long (argc, argv, optstring, long_options, &option_index);
@@ -339,10 +435,11 @@ int main(int argc, char *argv[])
             break;
 
         switch (c) {
-            case 'f': config = optarg;       break;
-            case 'l': device = optarg;       break;
-            case 's': baud   = atoi(optarg); break;
-            case 'p': port   = atoi(optarg); break;
+            case 'f': config    = optarg;       break;
+            case 'l': device    = optarg;       break;
+            case 's': baud      = atoi(optarg); break;
+            case 'p': port      = atoi(optarg); break;
+            case 'o': old_proto = 1;            break;
 
             default:
                 usage(argv[0]);
@@ -357,6 +454,10 @@ int main(int argc, char *argv[])
 
     read_config(config);
     fprintf(stderr, "Using device %s, baud %d\n", device, baud);
+
+    if (old_proto)
+        fprintf(stderr, "Using old protocol\n");
+
     fd = serial_open(device, baud);
     source = opc_new_source(port);
     refresh();
