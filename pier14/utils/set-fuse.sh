@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -x
 avrdude -c usbtiny -P usb -p m88p       \
 	    -U  hfuse:w:0xdc:m     	\
 	    -U  lfuse:w:0xe7:m     	\
