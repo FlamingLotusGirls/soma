@@ -40,9 +40,11 @@ def create_json(filename, *arg):
                 output_string += ",\n"
 
     json_file_name = arg[0].replace(".txt", ".json")
-
-    output_string += "]"
+    output_string = output_string[:-2]
+    output_string += "\n]"
     print output_string
+    print json.loads(output_string)
+
     write_to_file = open(json_file_name, 'w')
     write_to_file.write(output_string)
     write_to_file.close()
