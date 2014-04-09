@@ -49,7 +49,7 @@ class SineWaveLayer(EffectLayer):
 if __name__ == '__main__':
 
     # model = SomaModel('../../cad/SomaPointParsing/input_points.json')
-    model = SomaModel('test-points.json')
+    model = SomaModel()
 
     # a playlist. each entry in a playlist can contain one or more effect layers
     # (if more than one, they are all rendered into the same frame...mixing method 
