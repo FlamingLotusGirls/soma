@@ -37,10 +37,11 @@ def create_json(filename, *arg):
                 continue
             else:
                 output_string += parse_cad_points_to_json(arg[i], arg[i+1])
+                output_string += "\n"
 
     json_file_name = arg[0].replace(".txt", ".json")
 
-    output_string += "\n]"
+    output_string += "]"
     print output_string
     write_to_file = open(json_file_name, 'w')
     write_to_file.write(output_string)
