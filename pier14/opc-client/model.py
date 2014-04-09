@@ -11,11 +11,18 @@ class Model(object):
 
 class SomaModel(Model):
 
-    def __init__(self, points_filename):
+    def __init__(self, points_filename='points.json'):
         self.json = json.load(open(points_filename))
 
         # pull raw positions from JSON
         self.rawPoints = self._nodesFromJSON()
+
+        #sort points into regions
+        self.regionIndicies = {}
+        for i in range(len(self.json)):
+            region = self.json[i]['region']
+            idx_list = self.regionIndicies.setdefault(region, [])
+            idx_list.append(i)
 
         Model.__init__(self, len(self.rawPoints))
 
@@ -42,13 +49,13 @@ class SomaModel(Model):
         return numpy.array(points)
 
     def _getAxonIndices(self):
-        return numpy.array([])
+        return self.regionIndicies['Axon']
 
     def _getLowerIndices(self):
-        return numpy.where(self.rawPoints[:,0] < 0) # since there are no axon LEDs yet, we can just split by sign
+        return self.regionIndicies['Lower']
 
     def _getUpperIndices(self):
-        return numpy.where(self.rawPoints[:,0] > 0)
+        return self.regionIndicies['Upper']
 
     def _testPrint(self):
         print self.upperIndices
