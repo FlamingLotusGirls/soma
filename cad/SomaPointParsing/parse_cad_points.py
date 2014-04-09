@@ -15,7 +15,7 @@ def parse_cad_points_to_json(file, region):
             new_array = []
             for x in row_array:
                 new_array.append(float(x)/1000)
-            output_string += '{"point": ' + str(new_array) + ', "region": ' + region + '},\n'
+            output_string += '{"point": ' + str(new_array) + ', "region": "' + region + '"},\n'
 
     output_string = output_string[:-2]
     return output_string
@@ -29,8 +29,8 @@ def create_json(filename, *arg):
         return        
     output_string = "[\n"
 
-    if arg_length == 2:
-        output_string += parse_cad_points_to_json(arg[1], "main region")
+    if arg_length == 1:
+        output_string += parse_cad_points_to_json(arg[0], "main region")
     else:
         for i in range(arg_length):
             if i % 2 != 0:
@@ -38,7 +38,7 @@ def create_json(filename, *arg):
             else:
                 output_string += parse_cad_points_to_json(arg[i], arg[i+1])
 
-    json_file_name = input1.replace(".txt", ".json")
+    json_file_name = arg[0].replace(".txt", ".json")
 
     output_string += "\n]"
     print output_string
@@ -49,7 +49,7 @@ def create_json(filename, *arg):
     return json_file_name
 
 if len(sys.argv) > 1:
-    json_file = create_json(sys.argv)
+    json_file = create_json(*sys.argv)
     print json_file + " created"
 else:
     print "Booooo-urns"
