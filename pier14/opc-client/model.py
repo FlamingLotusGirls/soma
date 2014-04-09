@@ -13,9 +13,11 @@ class SomaModel(Model):
 
     def __init__(self, points_filename='points.json'):
         self.json = json.load(open(points_filename))
-
+        
         # pull raw positions from JSON
         self.rawPoints = self._nodesFromJSON()
+
+        Model.__init__(self, len(self.rawPoints))
 
         #sort points into regions
         self.regionIndicies = {}
@@ -24,7 +26,6 @@ class SomaModel(Model):
             idx_list = self.regionIndicies.setdefault(region, [])
             idx_list.append(i)
 
-        Model.__init__(self, len(self.rawPoints))
 
         # get indices of nodes in different portions of the sculpture
         self.axonIndices = self._getAxonIndices()

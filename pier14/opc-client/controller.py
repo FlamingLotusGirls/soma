@@ -72,6 +72,7 @@ class AnimationController(object):
 
         # Note: You'd think it would be faster to use float32 on the rPI, but
         #       32-bit floats take a slower path in NumPy sadly.
+        # Also: Numpy makes float64s by default
         frame = numpy.zeros((self.model.numLEDs, 3))
 
         self.renderer.render(self.model, self.params, frame)
