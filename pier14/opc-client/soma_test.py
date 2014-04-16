@@ -2,7 +2,8 @@ from model import SomaModel
 from renderer import Renderer
 from controller import AnimationController
 from effectlayer import *
-from effects.FireflySwarmLayer import *
+from effects.firefly_swarm import *
+from effects.color_cycle import *
 from playlist import Playlist
 from threads import PlaylistAdvanceThread
 from random import random
@@ -62,7 +63,8 @@ if __name__ == '__main__':
         #     # ColorBlinkyLayer(),
         # ],
         [
-            FireflySwarmLayer(),
+            # FireflySwarmLayer(),
+            MultiplierLayer(FireflySwarmLayer(), ColorCycleLayer())
         ],
     ])
 
