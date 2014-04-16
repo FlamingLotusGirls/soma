@@ -2,6 +2,7 @@ from model import SomaModel
 from renderer import Renderer
 from controller import AnimationController
 from effectlayer import *
+from effects.FireflySwarmLayer import *
 from playlist import Playlist
 from threads import PlaylistAdvanceThread
 from random import random
@@ -55,14 +56,14 @@ if __name__ == '__main__':
     # (if more than one, they are all rendered into the same frame...mixing method 
     # is determined by individual effect layers' render implementations)
     playlist = Playlist([
-        [
-            SineWaveLayer(color = (0.2, 0.5, 1)),
-            # SomaTestLayer(),
-            # ColorBlinkyLayer(),
-        ],
         # [
-        #     SnowstormLayer(),
+        #     SineWaveLayer(color = (0.2, 0.5, 1)),
+        #     # SomaTestLayer(),
+        #     # ColorBlinkyLayer(),
         # ],
+        [
+            FireflySwarmLayer(),
+        ],
     ])
 
     # master parameters, used in rendering and updated by playlist advancer thread
