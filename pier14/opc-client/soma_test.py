@@ -1,9 +1,11 @@
+#!/usr/bin/env python
 from model import SomaModel
 from renderer import Renderer
 from controller import AnimationController
 from effectlayer import *
 from effects.firefly_swarm import *
 from effects.color_cycle import *
+from effects.chase import AxonChaseLayer
 from playlist import Playlist
 from threads import PlaylistAdvanceThread
 from random import random
@@ -66,6 +68,11 @@ if __name__ == '__main__':
             # FireflySwarmLayer(),
             MultiplierLayer(FireflySwarmLayer(), ColorCycleLayer())
         ],
+        [
+            AxonChaseLayer(color=(0,1,0), trigger_threshold=0.2, cycle_time=1.5),
+            AxonChaseLayer(color=(0,0,1), trigger_threshold=0.1, cycle_time=1.5),
+        ],
+
     ])
 
     # master parameters, used in rendering and updated by playlist advancer thread
