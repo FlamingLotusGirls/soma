@@ -4,15 +4,15 @@ Pulled out of the Mens Amplio repo (https://github.com/mens-amplio/mens-amplio) 
 
 Instructions to run example in lighting simulator:
 * Clone this repo
-* Clone the Open Pixel Control repo (https://github.com/zestyping/openpixelcontrol)
+* Clone the Open Pixel Control repo (https://github.com/FlamingLotusGirls/openpixelcontrol) - be sure to clone the FLG fork and not the original!
 * Install dependencies
-* Build OPC and launch visualizer:
-  * cd [whatever]/openpixelcontrol
+* Build OPC - this only has to happen once:
+  * cd [path-to-openpixelcontrol-repo]
   * make
-  * bin/gl_server [path-to-points-json-file] 7890 [path-to-STL-model-file] &
+* Launch visualizer:
+  * cd [path-to-soma-repo]/pier14/opc-client
+  * [path-to-openpixelcontrol-repo]/openpixelcontrol/bin/gl_server points.json 7890 model.stl &
 * Run the test script: python soma_test.py
-
-For early testing, we are using an out-of-date points json and STL file that live in this same directory. The points json argument should match whatever is passed to the model constructor in soma_test.py. If you don't have an STL mesh, that argument to the visualizer can be omitted.
 
 Dependencies:
 * numpy
