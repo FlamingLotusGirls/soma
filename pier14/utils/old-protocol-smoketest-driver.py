@@ -67,9 +67,9 @@ def send_long(ser, addr, *data):
 # Color sequence
 sequence = [
         (  0,   0,   0,  0),
-        (  1,   0,   0,  0),
-        (  0,   1,   0,  0),
-        (  0,   0,   1,  0),
+        (  100,   0,   0,  0),
+        (  0,   100,   0,  0),
+        (  0,   0,   100,  0),
     ]
 
 if __name__ == "__main__":

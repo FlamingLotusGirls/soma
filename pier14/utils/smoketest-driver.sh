@@ -1,20 +1,8 @@
 #!/bin/bash
 
+SERIAL_PORT = ARGV[1]
 cd $(dirname $0)
 
-./send.pl -v --loop 0.75 \
-	rgblatch,0xff,01_00_00	\
-	rgblatch,0xff,00_01_00	\
-	rgblatch,0xff,00_00_01	\
-	\
-	rgblatch,0xff,00_00_00	\
-	\
-	rgblatch,0xff,ff_00_00	\
-	rgblatch,0xff,00_ff_00	\
-	rgblatch,0xff,00_00_ff	\
-	\
-	rgblatch,0xff,00_00_00	\
-	\
-	rgblatch,0xff,ff_ff_ff	\
-	\
+./send.pl --device /dev/tty.usbserial-A602HXJY -v --loop 0.75 \
+	rgblatch,0xff,10_10_10	\
 	rgblatch,0xff,00_00_00	\
