@@ -7,7 +7,7 @@ from effects.firefly_swarm import *
 from effects.color_cycle import *
 from effects.chase import AxonChaseLayer
 from playlist import Playlist
-from threads import PlaylistAdvanceThread
+from threads import PlaylistAdvanceThread, KeyboardMonitorThread
 from random import random
 from math import *
 
@@ -93,4 +93,11 @@ if __name__ == '__main__':
     advancer.start()
 
     # go!
-    controller.drawingLoop()
+    # controller.drawingLoop()
+    try:
+        keymonitor = KeyboardMonitorThread(masterParams)
+        keymonitor.start()
+        while True and keymonitor.isAlive():
+            controller.drawFrame()
+    except KeyboardInterrupt:
+        exit()

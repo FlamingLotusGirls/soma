@@ -13,6 +13,9 @@ class EffectParameters(object):
     time = 0
     targetFrameRate = 40.0  
 
+    # list of times that the buttons have been held down. 0 if they are up.
+    buttonTimes = []
+
 
 class EffectLayer(object):
     """Abstract base class for one layer of an LED light effect. Layers operate on a shared framebuffer,
