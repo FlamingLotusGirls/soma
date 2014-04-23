@@ -25,7 +25,7 @@ class AnimationController(object):
 
         self._fpsFrames = 0
         self._fpsTime = 0
-        self._fpsLogPeriod = 0.5    # How often to log frame rate
+        self._fpsLogPeriod = 1    # How often to log frame rate
 
     def advanceTime(self):
         """Update the timestep in EffectParameters.

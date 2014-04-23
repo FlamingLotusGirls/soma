@@ -30,7 +30,7 @@ class AxonChaseLayer(EffectLayer):
             # node = model.nodes[i]
             dist = abs(x - phi)
             if dist < self.trigger_threshold:
-                print "%d %f %f" % (i, x, dist)
+                # print "%d %f %f" % (i, x, dist)
                 frame[i] = self.color * (1-dist)
 
         return frame

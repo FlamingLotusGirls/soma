@@ -11,7 +11,10 @@ class EffectParameters(object):
        """
 
     time = 0
-    targetFrameRate = 40.0  
+    targetFrameRate = 40.0 
+    
+    buttonCnt = 2
+    buttonTimes = [0]*buttonCnt #how long the buttons have been down for, or 0 if they're up
 
 
 class EffectLayer(object):

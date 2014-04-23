@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import curses.wrapper
 from model import SomaModel
 from renderer import Renderer
 from controller import AnimationController
@@ -7,9 +8,11 @@ from effects.firefly_swarm import *
 from effects.color_cycle import *
 from effects.chase import AxonChaseLayer
 from playlist import Playlist
-from threads import PlaylistAdvanceThread
+from threads import PlaylistAdvanceThread, KeyboardMonitorThread
 from random import random
 from math import *
+import os
+import sys
 
 
 # Just a test to make sure that I can reference sections of the new model
@@ -49,8 +52,11 @@ class SineWaveLayer(EffectLayer):
         # multplied with the color array to yield a Nx3 array
         frame[:] = cosines.reshape(-1,1) * self.color
 
-
-if __name__ == '__main__':
+def main(screen):
+    # re-open stdout with a buffer size of 0. this makes print commands work again.
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+    screen.clear()
+    screen.refresh()
 
     # model = SomaModel('../../cad/SomaPointParsing/input_points.json')
     model = SomaModel()
@@ -92,5 +98,13 @@ if __name__ == '__main__':
     advancer = PlaylistAdvanceThread(renderer, switchInterval=10)
     advancer.start()
 
+    # put keyboard state into effect parameters
+    keymonitor = KeyboardMonitorThread(masterParams, screen)
+    keymonitor.start()
+
     # go!
     controller.drawingLoop()
+
+
+if __name__ == '__main__':
+    curses.wrapper(main)
