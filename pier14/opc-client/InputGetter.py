@@ -17,7 +17,7 @@ class KeyboardInputGetter(InputGetter):
 
         self.buttonDownKeys = ["d", "k"]
         self.buttonUpKeys = ["e", "i"]
-        self.buttonDown = [0, 0] # time that the button was pressed down, or 0 if it's up
+        self.cachedTimes = [0, 0] # time that the button was pressed down or released
 
         for i in range(len(self.buttonDownKeys)):
             sys.stderr.write("Button #%i down/up: %s/%s\n" % (i, self.buttonDownKeys[i], self.buttonUpKeys[i]))
@@ -30,21 +30,17 @@ class KeyboardInputGetter(InputGetter):
             except:
                 pass
 
-            for i in range(len(self.buttonDown)):
+            for i in range(len(self.buttonDownKeys)):
                 # update button-down times stored in this object
-                if char == self.buttonDownKeys[i]:
-                    if self.buttonDown[i] == 0:
-                        self.buttonDown[i] = time.time()
-                elif char == self.buttonUpKeys[i]:
-                    self.buttonDown[i] = 0
-            
-                # update button-press-elapsed times in params
-                if self.buttonDown[i]:
-                    effectparams.buttonTimes[i] = time.time() - self.buttonDown[i]
-                    print "button #" + str(i) + ": " + str(effectparams.buttonTimes[i]) + "\n"
-                else:
-                    effectparams.buttonTimes[i] = 0
+                if char == self.buttonDownKeys[i] and effectparams.buttonState[i] != True:
+                    effectparams.buttonState[i] = True
+                    self.cachedTimes[i] = time.time()
+                elif char == self.buttonUpKeys[i] and effectparams.buttonState[i] != False:
+                    effectparams.buttonState[i] = False
+                    self.cachedTimes[i] = time.time()
 
+                effectparams.buttonTimeSinceStateChange[i] = time.time() - self.cachedTimes[i]
+            
 
 # Gets inputs from GPIO pins on Beaglebone Black
 class GpioInputGetter(InputGetter):

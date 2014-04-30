@@ -6,6 +6,8 @@ from controller import AnimationController
 from effectlayer import *
 from effects.firefly_swarm import *
 from effects.color_cycle import *
+from effects.button_test import *
+from effects.random_phase import *
 from effects.chase import AxonChaseLayer
 from playlist import Playlist
 from threads import PlaylistAdvanceThread, KeyboardMonitorThread
@@ -72,12 +74,13 @@ def main(screen):
         # ],
         [
             # FireflySwarmLayer(),
-            MultiplierLayer(FireflySwarmLayer(), ColorCycleLayer())
+            # ButtonTestLayer()
+           RandomPhaseLayer()
         ],
-        [
-            AxonChaseLayer(color=(0,1,0), trigger_threshold=0.2, cycle_time=1.5),
-            AxonChaseLayer(color=(0,0,1), trigger_threshold=0.1, cycle_time=1.5),
-        ],
+        # [
+            # AxonChaseLayer(color=(0,1,0), trigger_threshold=0.2, cycle_time=1.5),
+            # AxonChaseLayer(color=(0,0,1), trigger_threshold=0.1, cycle_time=1.5),
+        # ],
 
     ])
 

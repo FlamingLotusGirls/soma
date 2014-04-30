@@ -14,7 +14,8 @@ class EffectParameters(object):
     targetFrameRate = 40.0 
     
     buttonCnt = 2
-    buttonTimes = [0]*buttonCnt #how long the buttons have been down for, or 0 if they're up
+    buttonState = [False]*buttonCnt # true if button is pressed or false if it is not pressed
+    buttonTimeSinceStateChange = [0]*buttonCnt #how long since the button last changed state
 
 
 class EffectLayer(object):
