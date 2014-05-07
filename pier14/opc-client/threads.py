@@ -12,7 +12,7 @@ class PlaylistAdvanceThread(Thread):
         self.daemon = True
         self.renderer = renderer
         self.switchInterval = switchInterval
-        
+
     def run(self):
         lastActive = time.time()
         while True:
@@ -28,8 +28,10 @@ class KeyboardMonitorThread(Thread):
         self.daemon = True
         self.params = params
         self.getter = KeyboardInputGetter(screen)
+        self.buttonGetter = ButtonInputGetter()
 
     def run(self):
         while True:
             self.getter.update(self.params)
+            self.buttonGetter.update(self.params)
             time.sleep(0.05)

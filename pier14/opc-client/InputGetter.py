@@ -1,4 +1,5 @@
 import time
+import os
 import sys
 import effectlayer
 
@@ -40,7 +41,36 @@ class KeyboardInputGetter(InputGetter):
                     self.cachedTimes[i] = time.time()
 
                 effectparams.buttonTimeSinceStateChange[i] = time.time() - self.cachedTimes[i]
-            
+
+# Button input getter checks to see if there's a node
+# in /dev. If there is - its a sign of a button press.
+# If node is not present - it means that the button
+# is not pressed. It is assumed that there's another
+# daemon process that runs in parallel to control the nodes
+class ButtonInputGetter(InputGetter):
+    BUTTON_DEV_PATH = '/dev/button'
+    button_id = ["A", "B"]
+
+    class Button:
+        dev_node = ""
+        state = False
+        time_changed = 0.0
+
+    def __init__(self, button_count = 2):
+        self.buttons = []
+        for i in range(button_count):
+            b = ButtonInputGetter.Button()
+            b.dev_node = ButtonInputGetter.BUTTON_DEV_PATH + ButtonInputGetter.button_id[i]
+            self.buttons.append(b)
+
+    def update(self, effectparams):
+        for i in range(len(self.buttons)):
+            current_state = os.path.exists(self.buttons[i].dev_node)
+            if (current_state != self.buttons[i].state):
+                self.buttons[i].state = current_state
+                self.buttons[i].time_changed = time.time()
+                effectparams.buttonState[i] = current_state
+            effectparams.buttonTimeSinceStateChange[i] = time.time() - self.buttons[i].time_changed
 
 # Gets inputs from GPIO pins on Beaglebone Black
 class GpioInputGetter(InputGetter):
