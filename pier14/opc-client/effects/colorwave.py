@@ -21,7 +21,8 @@ def hsvColorAdd(npRgbColor, hsv):
     newhsv = np.array(hsv1) + np.array(hsv)
     return np.array(hsv_to_rgb(*tuple(newhsv)))
 
-
+def mutateColor(color, hue_jitter=0.1, sat_jitter=0.5, val_jitter=0.5):
+    return hsvColorAdd(color, ( jitter(hue_jitter) % 1.0, jitter(sat_jitter), jitter(val_jitter) ))
 
 
 
@@ -29,17 +30,18 @@ class ColorWave(EffectLayer):
     def __init__(self, model):
         self.model = model
         self.phases = [ random.random() for i in range(self.model.numLEDs) ]
-        self.frequencies = [CENTER_FREQ for i in range(self.model.numLEDs) ]
+        self.frequencies = [CENTER_FREQ + jitter(0.05) for i in range(self.model.numLEDs) ]
         self.color = randomColor()
-        self.colors = [ hsvColorAdd(self.color, (jitter(0.1) % 1.0, jitter(0.5), jitter(0.5)))  for i in range(self.model.numLEDs)]
+        self.colors = [ mutateColor(self.color) for i in range(self.model.numLEDs)]
 
     def render(self, model, params, frame):
         for i in range(len(self.phases)):
-            self.phases[i] += jitter()
+            # self.phases[i] += jitter()
             self.frequencies[i] += jitter(0.00000000001)
 
 
         for i in range(self.model.numLEDs):
-            color = self.colors[i] + [ jitter(0.02), 0, 0]
+            # color = mutateColor(self.colors[i], 0, 0.005, 0)
+            color = self.colors[i]
             frame[i] = color * (math.sin(math.pi*(params.time*self.frequencies[i] + self.phases[i])))**2
 
