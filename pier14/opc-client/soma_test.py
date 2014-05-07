@@ -8,6 +8,7 @@ from effects.firefly_swarm import *
 from effects.color_cycle import *
 from effects.button_test import *
 from effects.random_phase import *
+from effects.random_blink_cycle import *
 from effects.chase import AxonChaseLayer
 from playlist import Playlist
 from threads import PlaylistAdvanceThread, KeyboardMonitorThread
@@ -64,7 +65,7 @@ def main(screen):
     model = SomaModel()
 
     # a playlist. each entry in a playlist can contain one or more effect layers
-    # (if more than one, they are all rendered into the same frame...mixing method 
+    # (if more than one, they are all rendered into the same frame...mixing method
     # is determined by individual effect layers' render implementations)
     playlist = Playlist([
         # [
@@ -74,8 +75,9 @@ def main(screen):
         # ],
         [
             # FireflySwarmLayer(),
-            # ButtonTestLayer()
-           RandomPhaseLayer(model)
+            # ButtonTestLayer(),
+            # RandomBlinkCycleLayer(model)
+            RandomPhaseLayer(model)
         ],
         # [
             # AxonChaseLayer(color=(0,1,0), trigger_threshold=0.2, cycle_time=1.5),
