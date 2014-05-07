@@ -75,7 +75,7 @@ def main(screen):
         [
             # FireflySwarmLayer(),
             # ButtonTestLayer()
-           RandomPhaseLayer()
+           RandomPhaseLayer(model)
         ],
         # [
             # AxonChaseLayer(color=(0,1,0), trigger_threshold=0.2, cycle_time=1.5),
