@@ -20,7 +20,7 @@ class KeyboardInputGetter(InputGetter):
         self.cachedTimes = [0, 0] # time that the button was pressed down or released
 
         for i in range(len(self.buttonDownKeys)):
-            sys.stderr.write("Button #%i down/up: %s/%s\n" % (i, self.buttonDownKeys[i], self.buttonUpKeys[i]))
+            print("Button #%i down/up: %s/%s" % (i, self.buttonDownKeys[i], self.buttonUpKeys[i]))
 
     def update(self, effectparams):
             # get a character from the curses screen
