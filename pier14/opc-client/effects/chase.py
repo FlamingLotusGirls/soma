@@ -5,31 +5,48 @@ import sys
 
 CYCLE_TIME = 2
 OFFSET = 0
-TRIGGER_THRESHOLD = 0.05
-COLOR = (0,0,1)
+DISTANCE_THRESHOLD = 0.05
+COLOR = (1,1,1)
 
 class AxonChaseLayer(EffectLayer):
 
-    def __init__(self, cycle_time=CYCLE_TIME, offset=OFFSET, color=COLOR, trigger_threshold=TRIGGER_THRESHOLD):
+    def __init__(self, cycle_time=CYCLE_TIME, offset=OFFSET, color=COLOR, distance_threshold=DISTANCE_THRESHOLD, segments=['axon'], direction='forward', blend_mode='replace'):
         self.color = np.array(color)
         self.cycle_time = cycle_time
         self.offset = offset
-        self.trigger_threshold = trigger_threshold
+        self.distance_threshold = distance_threshold
+        if direction not in ('forward','reverse'):
+            direction = 'forward'
+        self.direction = direction
+
+        model = SomaModel()
+        #select indices
+        indices = []
+        if 'axon' in segments or 'all' in segments:
+            indices += model.axonIndices 
+        if 'upper' in segments or 'all' in segments:
+            indices += model.upperIndices 
+        if 'lower' in segments or 'all' in segments:
+            indices += model.lowerIndices 
+        self.indices = indices
+        print indices
+
 
         # Extract and normalize axon point positions in one dimension
-        model = SomaModel()
-        x_coords = [model.nodes[i][1] for i in model.axonIndices]
+        x_coords = [model.nodes[i][1] for i in self.indices]
         min_ = min(x_coords)
         max_ = max(x_coords)
         self.normalized_x_coords = [(coord - min_) / (max_ - min_) for coord in x_coords]
 
     def render(self, model, params, frame):
         phi = self.phi(params)
+        if self.direction == 'forward':
+            phi = 1 - phi
 
-        for i, x in zip(model.axonIndices, self.normalized_x_coords):
+        for i, x in zip(self.indices, self.normalized_x_coords):
             # node = model.nodes[i]
             dist = abs(x - phi)
-            if dist < self.trigger_threshold:
+            if dist < self.distance_threshold:
                 # print "%d %f %f" % (i, x, dist)
                 frame[i] = self.color * (1-dist)
 
