@@ -49,7 +49,6 @@ class AxonChaseLayer(EffectLayer):
             if dist < self.distance_threshold:
                 # print "%d %f %f" % (i, x, dist)
                 frame[i] = self.color * (1-dist)
-
         return frame
 
     def phi(self, params):

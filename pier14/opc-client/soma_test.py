@@ -80,7 +80,9 @@ def main(screen):
            # RandomPhaseLayer(model)
            # MultiplierLayer(AxonChaseLayer(),ColorWave(model))
            # AxonChaseLayer(segments=['all'])
-           ColorWave(model),
+           # ColorWave(model),
+           RandomPhaseLayer(model)
+           # AxonChaseLayer()
         ],
         # [
             # AxonChaseLayer(color=(0,1,0), trigger_threshold=0.2, cycle_time=1.5),
