@@ -10,6 +10,7 @@ from effects.button_test import *
 from effects.random_phase import *
 from effects.random_blink_cycle import *
 from effects.chase import AxonChaseLayer
+from effects.colorwave import ColorWave
 from playlist import Playlist
 from threads import PlaylistAdvanceThread, KeyboardMonitorThread
 from random import random
@@ -75,9 +76,11 @@ def main(screen):
         # ],
         [
             # FireflySwarmLayer(),
-            # ButtonTestLayer(),
-            # RandomBlinkCycleLayer(model)
-            RandomPhaseLayer(model)
+            # ButtonTestLayer()
+           # RandomPhaseLayer(model)
+           # MultiplierLayer(AxonChaseLayer(),ColorWave(model))
+           # AxonChaseLayer(segments=['all'])
+           ColorWave(model),
         ],
         # [
             # AxonChaseLayer(color=(0,1,0), trigger_threshold=0.2, cycle_time=1.5),
