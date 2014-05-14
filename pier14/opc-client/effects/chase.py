@@ -31,12 +31,8 @@ class AxonChaseLayer(EffectLayer):
         self.indices = indices
         print indices
 
-
-        # Extract and normalize axon point positions in one dimension
-        x_coords = [model.nodes[i][1] for i in self.indices]
-        min_ = min(x_coords)
-        max_ = max(x_coords)
-        self.normalized_x_coords = [(coord - min_) / (max_ - min_) for coord in x_coords]
+        # Extract axon point positions in one dimension (they are normalized already)
+        self.normalized_x_coords = model.nodes[:,1][self.indices]
 
     def render(self, model, params, frame):
         phi = self.phi(params)
