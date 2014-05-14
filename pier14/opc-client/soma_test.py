@@ -69,21 +69,24 @@ def main(screen):
     # (if more than one, they are all rendered into the same frame...mixing method
     # is determined by individual effect layers' render implementations)
     playlist = Playlist([
+        [
+           RandomPhaseLayer(model),
+           ColorCycleLayer()
+        ]
         # [
         #     SineWaveLayer(color = (0.2, 0.5, 1)),
         #     # SomaTestLayer(),
         #     # ColorBlinkyLayer(),
         # ],
-        [
+        #[
             # FireflySwarmLayer(),
             # ButtonTestLayer()
            # RandomPhaseLayer(model)
            # MultiplierLayer(AxonChaseLayer(),ColorWave(model))
            # AxonChaseLayer(segments=['all'])
            # ColorWave(model),
-           RandomPhaseLayer(model)
            # AxonChaseLayer()
-        ],
+        #],
         # [
             # AxonChaseLayer(color=(0,1,0), trigger_threshold=0.2, cycle_time=1.5),
             # AxonChaseLayer(color=(0,0,1), trigger_threshold=0.1, cycle_time=1.5),

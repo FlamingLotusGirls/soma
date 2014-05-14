@@ -11,7 +11,7 @@ class RandomPhaseLayer(EffectLayer):
         self.phase = [0]*model.numLEDs
         for i in range(model.numLEDs):
             self.phase[i] = random.random()
-        self.color = numpy.array((1, 0.5, 0.2))
+        self.color = numpy.array((1, 1, 1))
         self.lowerRandomness = 1
         self.upperRandomness = 1
         self.axonOn = False
