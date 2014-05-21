@@ -11,6 +11,7 @@ from effects.random_blink_cycle import *
 from effects.chase import AxonChaseLayer
 from effects.colorwave import ColorWave
 from effects.colorwiper import ColorWiper
+from effects.color_palette_battle import *
 from playlist import Playlist
 from threads import PlaylistAdvanceThread, KeyboardMonitorThread
 from random import random
@@ -82,23 +83,26 @@ def main(screen):
         # [
         #    RandomPhaseLayer(model),
         #    ColorCycleLayer()
-        # ]
+        # ],
+        [
+            ColorPaletteBattleLayer(model)
+        ],
         # [
         #     SineWaveLayer(color = (0.2, 0.5, 1)),
         #     # SomaTestLayer(),
         #     # ColorBlinkyLayer(),
         # ],
-        [
+        #[
             # FireflySwarmLayer(),
             # ButtonTestLayer()
            # RandomPhaseLayer(model)
            # MultiplierLayer(AxonChaseLayer(),ColorWave(model))
            # AxonChaseLayer(segments=['all'])
            # ColorWave(model),
-           MultiplierLayer(ColorWave(model), ColorWiper(model)),
-           # RandomPhaseLayer(model)
+        #    MultiplierLayer(ColorWave(model), ColorWiper(model)),
+        #    ColorWave(model),
            # AxonChaseLayer()
-        ],
+        #],
         # [
             # AxonChaseLayer(color=(0,1,0), trigger_threshold=0.2, cycle_time=1.5),
             # AxonChaseLayer(color=(0,0,1), trigger_threshold=0.1, cycle_time=1.5),
