@@ -6,30 +6,57 @@ import png
 
 class PhotoColorsLayer(EffectLayer):
 
-    def __init__(self, model):
-        reader = png.Reader("images/light_fixture.png")
+    def __init__(self, model, image="images/light_fixture.png"):
+        self.image = image
+        self.file = open(image)
+        reader = png.Reader(self.file)
+        self.lastFrame = None
         print "reading photo"
-        photo = reader.read_flat()
+        photo = reader.read()
         print "width", photo[0]
         print "height", photo[1]
         print "metadata", photo[3]
         metadata = photo[3]
-        if metadata["alpha"]:
-            self.stepSize = 4
-        else:
-            self.stepSize = 3
+        self.alpha = metadata['alpha'] # Boolean indicates the presense of an alpha channel.
         self.photoSize = photo[0] * photo[1]
-        self.pixels = photo[2]
+        self.rows = photo[2]
         self.offset = 0
+        self.pixelIter = self._pixelIter()
 
-    def getPixel(self, position):
-        position = position % self.photoSize
-        r = self.pixels[position*self.stepSize]
-        g = self.pixels[position*self.stepSize + 1]
-        b = self.pixels[position*self.stepSize + 2]
-        return numpy.array([r/255., g/255., b/255.]) 
+    def _pixelIter(self):
+        """
+        Infinitely iterate over pixels in the image.
+        """
+        while True:
+            # Generate a new row iterator
+            self.file.seek(0)
+            reader = png.Reader(self.file)
+            rowIter = reader.read()[2]
+            for row in rowIter:
+                width = len(row)
+                i = 0
+                try:
+                    while i < width:
+                        r = row[i]
+                        g = row[i+1]
+                        b = row[i+2]
+                        i += 3
+                        if self.alpha:
+                            i += 1
+                        pixel = numpy.array((r/255.,g/255.,b/255.))
+                        yield pixel
+                except IndexError:
+                    continue
 
     def render(self, model, params, frame):
-        for i in range(model.numLEDs):
-            frame[i] = self.getPixel(self.offset + i)
-        self.offset += 1
+        if self.lastFrame == None:
+            for i in xrange(len(frame)):
+               frame[i] = self.pixelIter.next()
+            self.lastFrame = frame
+        else:
+            # Shift the last frame over by one
+            for i in xrange(len(frame)-1):
+                frame[i] = self.lastFrame[i+1]
+            # add a new pixel from the stream
+            frame[-1] = self.pixelIter.next()
+            self.lastFrame = numpy.copy(frame)
