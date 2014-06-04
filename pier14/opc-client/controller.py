@@ -22,7 +22,8 @@ class AnimationController(object):
        """
 
     def __init__(self, model, renderer, params=None, server=None):
-        self.opc = FastOPC(server)
+        #self.opc = FastOPC(server)
+        self.opc = SplitOPC()
         self.model = model
         self.renderer = renderer
         self.params = params or EffectParameters()
@@ -134,3 +135,29 @@ class FastOPC(object):
             0x00,  # Command
             len(packedPixels))
         self.socket.send(header + packedPixels)
+
+class SplitOPC(FastOPC):
+    """
+    OPC client that tees output to multiple servers
+
+    """
+    class MultiSocket(object):
+        def __init__(self, servers):
+            self.sockets = []
+            for server in servers:
+                try:
+                    host, port = server.split(':')
+                    port = int(port)
+                    socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    socket.connect((host, port))
+                    socets.append(socket)
+                except:
+                    print("WARNING: Couldn't connect to %s" % socket)
+
+        def send(self, *args, **kwargs):
+            for socket in self.sockets:
+                socket.send(*args, **kwargs)
+
+    def __init__(self, servers=['127.0.0.1:7890', '127.0.0.1:7891']):
+        super(SplitOPC, self).__init__(*args, **kwargs)
+        self.socket = MultiSocket(servers)
