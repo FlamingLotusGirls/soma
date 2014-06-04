@@ -26,6 +26,10 @@
 #define CONFIG_VER		0
 #define CONFIG_DEFAULT_ADDR	0
 
+#define R_STATE 0x01
+#define G_STATE 0x02
+#define B_STATE 0x04
+
 struct config_data {
 	uint8_t ver;
 	uint8_t addr;

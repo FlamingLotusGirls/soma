@@ -53,7 +53,7 @@ my $LATCH        = 0x13;
 my $RGBDATA      = 0x14;
 my $RGBLATCH     = 0x15;
 
-my $device  = (glob "/dev/ttyUSB*")[0] || "";
+my $device  = (glob "/dev/ttyUSB*")[0] || (glob "/dev/tty.usbserial*")[0] || "";
 my $verbose = 0;
 my $dry_run = 0;
 my $raw     = 0;

@@ -5,14 +5,20 @@ from effectlayer import *
 
 class ColorCycleLayer(EffectLayer):
 
-    def __init__(self):
-        self.fadeSpeed = 0.001
-        self.colorSpread = 0.1
-        self.hueCentralValue = 0
+    def __init__(self, hueSpeed=0.00003, saturationSpeed=0.0005):
+        self.hueSpeed = hueSpeed
+        self.saturationSpeed = saturationSpeed
+        self.hue = 0
+        self.saturation = 1
 
     def render(self, model, params, frame):
-        self.hueCentralValue += self.fadeSpeed
-        if(self.hueCentralValue>1):
-            self.hueCentralValue -= 1
-        color = numpy.array(colorsys.hsv_to_rgb(self.hueCentralValue,1,1))
-        frame[:] += color
+        self.hue = self.increment(self.hue, self.hueSpeed)
+        self.saturation = self.increment(self.saturation, self.saturationSpeed)
+        color = numpy.array(colorsys.hsv_to_rgb(self.hue, math.sin(math.pi*self.saturation)**2, 1))
+        frame[:] *= color
+
+    def increment(self, value, step):
+        value += step
+        if value>1:
+            value -= 1
+        return value

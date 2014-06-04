@@ -5,11 +5,20 @@ from controller import AnimationController
 from effectlayer import *
 from effects.firefly_swarm import *
 from effects.color_cycle import *
+from effects.button_test import *
+from effects.random_phase import *
+from effects.random_blink_cycle import *
 from effects.chase import AxonChaseLayer
+from effects.colorwave import ColorWave
+from effects.colorwiper import ColorWiper
+from effects.color_palette_battle import *
+from effects.photo_colors import *
 from playlist import Playlist
-from threads import PlaylistAdvanceThread
+from threads import PlaylistAdvanceThread, KeyboardMonitorThread
 from random import random
 from math import *
+import os
+import sys
 
 
 # Just a test to make sure that I can reference sections of the new model
@@ -49,34 +58,63 @@ class SineWaveLayer(EffectLayer):
         # multplied with the color array to yield a Nx3 array
         frame[:] = cosines.reshape(-1,1) * self.color
 
+def main(screen):
 
-if __name__ == '__main__':
+    # master parameters, used in rendering and updated by playlist advancer thread
+    masterParams = EffectParameters()
+
+    # if we got a curses screen, use it for button emulation through the keyboard
+    if screen:
+        # re-open stdout with a buffer size of 0. this makes print commands work again.
+        sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+        screen.clear()
+        screen.refresh()
+
+        # put keyboard state into effect parameters
+        keymonitor = KeyboardMonitorThread(masterParams, screen)
+        keymonitor.start()
 
     # model = SomaModel('../../cad/SomaPointParsing/input_points.json')
     model = SomaModel()
 
     # a playlist. each entry in a playlist can contain one or more effect layers
-    # (if more than one, they are all rendered into the same frame...mixing method 
+    # (if more than one, they are all rendered into the same frame...mixing method
     # is determined by individual effect layers' render implementations)
     playlist = Playlist([
+        # [
+        #    RandomPhaseLayer(model),
+        #    ColorCycleLayer()
+        # ],
+        # [
+        #     ColorPaletteBattleLayer(model)
+        # ],
+        [
+            PhotoColorsLayer(model)
+        ],
         # [
         #     SineWaveLayer(color = (0.2, 0.5, 1)),
         #     # SomaTestLayer(),
         #     # ColorBlinkyLayer(),
         # ],
-        [
+        # [
+        #     MultiplierLayer(ColorWave(model), ColorWiper(model)),
+        # ],
+        # [
             # FireflySwarmLayer(),
-            MultiplierLayer(FireflySwarmLayer(), ColorCycleLayer())
-        ],
-        [
-            AxonChaseLayer(color=(0,1,0), trigger_threshold=0.2, cycle_time=1.5),
-            AxonChaseLayer(color=(0,0,1), trigger_threshold=0.1, cycle_time=1.5),
-        ],
+            # ButtonTestLayer()
+           # RandomPhaseLayer(model)
+           # MultiplierLayer(AxonChaseLayer(),ColorWave(model))
+           # AxonChaseLayer(segments=['all'])
+           # ColorWave(model),
+        #    ColorWave(model),
+           # AxonChaseLayer()
+        # ],
+        # [
+            # AxonChaseLayer(color=(0,1,0), trigger_threshold=0.2, cycle_time=1.5),
+            # AxonChaseLayer(color=(0,0,1), trigger_threshold=0.1, cycle_time=1.5),
+        # ],
 
     ])
-
-    # master parameters, used in rendering and updated by playlist advancer thread
-    masterParams = EffectParameters()
 
     # the renderer manages a playlist (or dict of multiple playlists), as well as transitions
     # and gamma correction
@@ -94,3 +132,13 @@ if __name__ == '__main__':
 
     # go!
     controller.drawingLoop()
+
+
+if __name__ == '__main__':
+    try:
+        # try to import curses for keyboard button emulator
+        import curses.wrapper
+        curses.wrapper(main)
+    except ImportError:
+        # otherwise just run main with no curses screen
+        main(None)

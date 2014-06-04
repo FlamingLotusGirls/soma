@@ -10,6 +10,10 @@ import sys
 import numpy
 import math
 import struct
+import logging
+
+logging.basicConfig()
+logger = logging.getLogger()
    
 class AnimationController(object):
     """Manages the main animation loop. Calls into the renderer to populate
@@ -25,7 +29,7 @@ class AnimationController(object):
 
         self._fpsFrames = 0
         self._fpsTime = 0
-        self._fpsLogPeriod = 0.5    # How often to log frame rate
+        self._fpsLogPeriod = 1    # How often to log frame rate
 
     def advanceTime(self):
         """Update the timestep in EffectParameters.
@@ -65,7 +69,7 @@ class AnimationController(object):
             fps = self._fpsFrames / (now - self._fpsTime)
             self._fpsTime = now
             self._fpsFrames = 0
-            sys.stderr.write("%7.2f FPS\n" % fps)
+            logger.debug("%7.2f FPS" % fps)
 
     def renderLayers(self):
         """Generate a complete frame of LED data by rendering each layer."""

@@ -11,7 +11,11 @@ class EffectParameters(object):
        """
 
     time = 0
-    targetFrameRate = 40.0  
+    targetFrameRate = 40.0 
+    
+    buttonCnt = 2
+    buttonState = [False]*buttonCnt # true if button is pressed or false if it is not pressed
+    buttonTimeSinceStateChange = [0]*buttonCnt #how long since the button last changed state
 
 
 class EffectLayer(object):
