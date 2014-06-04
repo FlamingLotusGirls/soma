@@ -22,6 +22,7 @@
 #include "uart.h"
 #include "config.h"
 #include "pins.h"
+#include "gamma_correction_table.h"
 
 #ifdef OLD_PROTO
 	#include "proto.h"
@@ -29,8 +30,11 @@
 	#include "proto2.h"
 #endif
 
-uint8_t led_val[3];
+uint8_t led_val_on[3];
+uint8_t led_val_off[3];
 uint8_t back_buffer[3];
+uint8_t cycle_counter[3];
+uint8_t cycle_state;
 
 void handle_rgb(uint8_t red, uint8_t green, uint8_t blue)
 {
@@ -41,9 +45,17 @@ void handle_rgb(uint8_t red, uint8_t green, uint8_t blue)
 
 void handle_latch(void)
 {
-	led_val[0] = back_buffer[0];
-	led_val[1] = back_buffer[1];
-	led_val[2] = back_buffer[2];
+	led_val_on[0] = on[back_buffer[0]];
+	led_val_on[1] = on[back_buffer[1]];
+	led_val_on[2] = on[back_buffer[2]];
+	led_val_off[0] = off[back_buffer[0]];
+	led_val_off[1] = off[back_buffer[1]];
+	led_val_off[2] = off[back_buffer[2]];
+	cycle_state = R_STATE | G_STATE | B_STATE; /* Set R_STATE, G_STATE, B_STATE */
+	cycle_counter[0] = led_val_on[0];
+	cycle_counter[1] = led_val_on[1];
+	cycle_counter[2] = led_val_on[2];
+
 }
 
 void handle_baud(uint32_t baud)
@@ -61,15 +73,80 @@ proto_t state = {
 
 ISR( TIMER0_COMPA_vect )
 {
-	static uint8_t phase;
-	uint8_t tmp_phase;
 	uint8_t port;
 
 	PORTD ^= _BV(D_TP1);
 	PORTD |= _BV(D_TP2);
 	port = PORTC;
 
-	phase++;
+	if(!cycle_counter[0]) {
+		cycle_state ^= R_STATE;
+		if(cycle_state & R_STATE)
+			cycle_counter[0] = led_val_on[0];
+		else
+			cycle_counter[0] = led_val_off[0];
+	}
+
+	if(!cycle_counter[1]) {
+		cycle_state ^= G_STATE;
+		if(cycle_state & G_STATE)
+			cycle_counter[1] = led_val_on[1];
+		else
+			cycle_counter[1] = led_val_off[1];
+	}
+
+	if(!cycle_counter[2]) {
+		cycle_state ^= B_STATE;
+		if(cycle_state & B_STATE)
+			cycle_counter[2] = led_val_on[2];
+		else
+			cycle_counter[2] = led_val_off[2];
+	}
+
+	if(cycle_counter[0]) {
+		--cycle_counter[0];
+		if(cycle_state & R_STATE)
+			port |= _BV(C_RED);
+		else
+			port &= ~_BV(C_RED);
+	} else {
+		if(cycle_state & R_STATE)
+			port &= ~_BV(C_RED);
+		else
+			port |= _BV(C_RED);
+	}
+
+	if(cycle_counter[1]) {
+		--cycle_counter[1];
+		if(cycle_state & G_STATE)
+			port |= _BV(C_GREEN);
+		else
+			port &= ~_BV(C_GREEN);
+	} else {
+		if(cycle_state & G_STATE)
+			port &= ~_BV(C_GREEN);
+		else
+			port |= _BV(C_GREEN);
+	}
+
+	if(cycle_counter[2]) {
+		--cycle_counter[2];
+		if(cycle_state & B_STATE)
+			port |= _BV(C_BLUE);
+		else
+			port &= ~_BV(C_BLUE);
+	} else {
+		if(cycle_state & B_STATE)
+			port &= ~_BV(C_BLUE);
+		else
+			port |= _BV(C_BLUE);
+	}
+
+
+		
+
+
+	/*phase++;
 	if (phase == 0)
 		phase = 1;
 	tmp_phase = phase;
@@ -97,7 +174,7 @@ ISR( TIMER0_COMPA_vect )
 	if (led_val[2] >= tmp_phase)
 		port |= _BV(C_BLUE);
 	else
-		port &= ~_BV(C_BLUE);
+		port &= ~_BV(C_BLUE);*/
 
 	PORTC = port;
 	PORTD &= ~_BV(D_TP2);
