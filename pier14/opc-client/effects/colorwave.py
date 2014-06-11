@@ -8,16 +8,19 @@ from colorsys import hsv_to_rgb, rgb_to_hsv
 CENTER_FREQ = 1.2 #Hz
 
 def mutateColor(color, hue_jitter=0.1, sat_jitter=0.5, val_jitter=0.5):
-    return hsvColorAdd(color,  colorJitter(hue_jitter, sat_jitter, val_jitter) )
+    return hsvColorAdd(color, colorJitter(hue_jitter, sat_jitter, val_jitter) )
 
 
 
 class ColorWave(EffectLayer):
-    def __init__(self, model):
+    def __init__(self, model, grayscale=False):
         self.model = model
         self.phases = [ random.random() for i in range(self.model.numLEDs) ]
         self.frequencies = [CENTER_FREQ + jitter(0.05) for i in range(self.model.numLEDs) ]
-        self.color = np.array([1,1,1])
+        if grayscale:
+            self.color = np.array([1,1,1])
+        else:
+            self.color = np.array([ random.random() for i in range(3) ])
         self.colors = [ mutateColor(self.color) for i in range(self.model.numLEDs)]
 
     def render(self, model, params, frame):

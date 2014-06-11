@@ -11,6 +11,7 @@ from effects.random_blink_cycle import *
 from effects.chase import AxonChaseLayer
 from effects.colorwave import ColorWave
 from effects.colorwiper import ColorWiper
+from effects.invert import InvertColorsLayer, InvertColorByRegionLayer
 from effects.color_palette_battle import *
 from effects.photo_colors import *
 from playlist import Playlist
@@ -88,17 +89,21 @@ def main(screen):
         # [
         #     ColorPaletteBattleLayer(model)
         # ],
-        [
-            PhotoColorsLayer(model)
-        ],
+        # [
+           #PhotoColorsLayer(model),
+           # InvertColorsLayer(),
+           #InvertColorByRegionLayer(model),
+        # ],
         # [
         #     SineWaveLayer(color = (0.2, 0.5, 1)),
         #     # SomaTestLayer(),
         #     # ColorBlinkyLayer(),
         # ],
-        # [
-        #     MultiplierLayer(ColorWave(model), ColorWiper(model)),
-        # ],
+        [
+            ColorWave(model),
+            # ColorWiper(model),
+             # MultiplierLayer(ColorWave(model), ColorWiper(model)),
+        ],
         # [
             # FireflySwarmLayer(),
             # ButtonTestLayer()
