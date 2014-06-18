@@ -276,7 +276,7 @@ LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 # Programming hardware: alf avr910 avrisp bascom bsd 
 # dt006 pavr picoweb pony-stk200 sp12 stk200 stk500
 #
-# Type: avrdude -c ?
+# Type:  -c ?
 # to get a full listing.
 #
 AVRDUDE_PROGRAMMER = avrispv2

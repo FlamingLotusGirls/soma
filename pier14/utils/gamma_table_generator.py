@@ -16,7 +16,7 @@ x = range(0,int(INPUT_SIZE+1))
 brightness = [cie1931(float(L)/INPUT_SIZE) for L in x]
 
 numerator = 1
-denominator = 256
+denominator = 255
 on = []
 off = []
 
@@ -28,7 +28,7 @@ for bright in brightness:
 			denominator -= 1
 
 		if denominator == 128:
-			denominator *= 2
+			denominator = 255
 			numerator *= 2
 	on.append(numerator)
 	off.append(denominator)
