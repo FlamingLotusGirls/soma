@@ -26,15 +26,6 @@
 #define CONFIG_VER		0
 #define CONFIG_DEFAULT_ADDR	0
 
-#define R_STATE 0x01
-#define G_STATE 0x02
-#define B_STATE 0x04
-#define R_DELTA 0x08
-#define G_DELTA 0x10
-#define B_DELTA 0x20
-
-#define DELTA_SHIFT 2
-
 struct config_data {
 	uint8_t ver;
 	uint8_t addr;

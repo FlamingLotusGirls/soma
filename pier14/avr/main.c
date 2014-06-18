@@ -30,66 +30,21 @@
 	#include "proto2.h"
 #endif
 
-uint8_t target_led_val_on[3];
-uint8_t target_led_val_off[3];
-uint8_t led_val_on[3];
-uint8_t led_val_off[3];
-uint8_t back_buffer[3];
-uint8_t cycle_counter[3];
-uint8_t cycle_state;
-int8_t delta[3];
+uint16_t led_val[3];
+uint16_t back_buffer[3];
 
 void handle_rgb(uint8_t red, uint8_t green, uint8_t blue)
 {
-	back_buffer[0] = red;
-	back_buffer[1] = green;
-	back_buffer[2] = blue;
+	back_buffer[0] = gamma_correction[red];
+	back_buffer[1] = gamma_correction[green];
+	back_buffer[2] = gamma_correction[blue];
 }
 
 void handle_latch(void)
 {
-	led_val_on[0] = on[back_buffer[0]];
-	led_val_on[1] = on[back_buffer[1]];
-	led_val_on[2] = on[back_buffer[2]];
-	led_val_off[0] = off[back_buffer[0]];
-	led_val_off[1] = off[back_buffer[1]];
-	led_val_off[2] = off[back_buffer[2]];
-	/*target_led_val_on[0] = on[back_buffer[0]];
-	target_led_val_on[1] = on[back_buffer[1]];
-	target_led_val_on[2] = on[back_buffer[2]];
-	target_led_val_off[0] = off[back_buffer[0]];
-	target_led_val_off[1] = off[back_buffer[1]];
-	target_led_val_off[2] = off[back_buffer[2]];
-	if(target_led_val_on[0] != led_val_on[0] || target_led_val_off[0] != led_val_off[0])
-	{
-		cycle_state |= R_DELTA;
-		delta[0] = (target_led_val_on[0] - led_val_on[0]) >> DELTA_SHIFT;
-	}
-	if(target_led_val_on[0] != led_val_on[0] || target_led_val_off[0] != led_val_off[0])
-	{
-		cycle_state |= G_DELTA;
-		delta[1] = (target_led_val_on[1] - led_val_on[1]) >> DELTA_SHIFT;
-	}
-	if(target_led_val_on[0] != led_val_on[0] || target_led_val_off[0] != led_val_off[0])
-	{
-		cycle_state |= B_DELTA;
-		delta[2] = (target_led_val_on[2] - led_val_on[2]) >> DELTA_SHIFT;
-	}*/
-	if(led_val_on[0] == 0)
-	{
-		cycle_state &= ~R_STATE;
-		cycle_counter[0] = 1;
-	}
-	if(led_val_on[1] == 0)
-	{
-		cycle_state &= ~G_STATE;
-		cycle_counter[1] = 1;
-	}
-	if(led_val_on[2] == 0)
-	{
-		cycle_state &= ~B_STATE;
-		cycle_counter[2] = 1;
-	}
+	led_val[0] = back_buffer[0];
+	led_val[1] = back_buffer[1];
+	led_val[2] = back_buffer[2];
 }
 
 void handle_baud(uint32_t baud)
@@ -97,33 +52,6 @@ void handle_baud(uint32_t baud)
 	if (!baud)
 		baud = BAUD;
 	uart_init(baud);
-}
-
-void handle_delta(uint8_t index)
-{
-	if(target_led_val_on[index] >> DELTA_SHIFT == led_val_on[index] >> DELTA_SHIFT)
-		led_val_on[index] = target_led_val_on[index];
-	if(target_led_val_off[index] >> DELTA_SHIFT == led_val_off[index] >> DELTA_SHIFT)
-		led_val_off[index] = target_led_val_off[index];
-	if(target_led_val_on[index] != led_val_on[index])
-		led_val_on[index] += delta[index];
-	if(target_led_val_off[index] != led_val_off[index])
-		led_val_off[index] += delta[index];
-	if(target_led_val_off[index] == led_val_off[index] && target_led_val_on[index] == led_val_on[index])
-	{
-		switch(index)
-		{
-		case 0:
-			cycle_state &= ~R_DELTA;
-			break;
-		case 1:
-			cycle_state &= ~G_DELTA;
-			break;
-		case 2:
-			cycle_state &= ~B_DELTA;
-			break;
-		}
-	}
 }
 
 proto_t state = {
@@ -134,87 +62,16 @@ proto_t state = {
 
 ISR( TIMER0_COMPA_vect )
 {
+	static uint16_t phase;
+	uint16_t tmp_phase;
 	uint8_t port;
 
 	PORTD ^= _BV(D_TP1);
 	PORTD |= _BV(D_TP2);
 	port = PORTC;
 
-	if(cycle_counter[0]) {
-		--cycle_counter[0];
-		if(cycle_state & R_STATE)
-			port |= _BV(C_RED);
-		else
-			port &= ~_BV(C_RED);
-	} else {
-		if(cycle_state & R_STATE)
-			port &= ~_BV(C_RED);
-		else
-			port |= _BV(C_RED);
-	}
-
-	if(cycle_counter[1]) {
-		--cycle_counter[1];
-		if(cycle_state & G_STATE)
-			port |= _BV(C_GREEN);
-		else
-			port &= ~_BV(C_GREEN);
-	} else {
-		if(cycle_state & G_STATE)
-			port &= ~_BV(C_GREEN);
-		else
-			port |= _BV(C_GREEN);
-	}
-
-	if(cycle_counter[2]) {
-		--cycle_counter[2];
-		if(cycle_state & B_STATE)
-			port |= _BV(C_BLUE);
-		else
-			port &= ~_BV(C_BLUE);
-	} else {
-		if(cycle_state & B_STATE)
-			port &= ~_BV(C_BLUE);
-		else
-			port |= _BV(C_BLUE);
-	}
-
-	if(!cycle_counter[0]) {
-		cycle_state ^= R_STATE;
-		if(cycle_state & R_DELTA)
-			handle_delta(0);
-		if(cycle_state & R_STATE)
-			cycle_counter[0] = led_val_on[0];
-		else
-			cycle_counter[0] = led_val_off[0];
-	}
-
-	if(!cycle_counter[1]) {
-		cycle_state ^= G_STATE;
-		if(cycle_state & G_DELTA)
-			handle_delta(1);
-		if(cycle_state & G_STATE)
-			cycle_counter[1] = led_val_on[1];
-		else
-			cycle_counter[1] = led_val_off[1];
-	}
-
-	if(!cycle_counter[2]) {
-		cycle_state ^= B_STATE;
-		if(cycle_state & B_DELTA)
-			handle_delta(2);
-		if(cycle_state & B_STATE)
-			cycle_counter[2] = led_val_on[2];
-		else
-			cycle_counter[2] = led_val_off[2];
-	}
-
-
-		
-
-
-	/*phase++;
-	if (phase == 0)
+	phase++;
+	if (phase > 511)
 		phase = 1;
 	tmp_phase = phase;
 
@@ -224,7 +81,7 @@ ISR( TIMER0_COMPA_vect )
 		port &= ~_BV(C_RED);
 
 	if (tmp_phase <= led_val[0])
-		tmp_phase += 255 - led_val[0];
+		tmp_phase += 511 - led_val[0];
 	else	
 		tmp_phase -= led_val[0];
 
@@ -234,14 +91,14 @@ ISR( TIMER0_COMPA_vect )
 		port &= ~_BV(C_GREEN);
 
 	if (tmp_phase <= led_val[1])
-		tmp_phase += 255 - led_val[1];
+		tmp_phase += 511 - led_val[1];
 	else	
 		tmp_phase -= led_val[1];
 
 	if (led_val[2] >= tmp_phase)
 		port |= _BV(C_BLUE);
 	else
-		port &= ~_BV(C_BLUE);*/
+		port &= ~_BV(C_BLUE);
 
 	PORTC = port;
 	PORTD &= ~_BV(D_TP2);
@@ -261,7 +118,7 @@ void hw_setup(void)
 
 	/* interrupt at 24 kHz (255 levels at 94 Hz PWM) */
 	TCCR0B = _BV(CS01) | _BV(CS00);
-	OCR0A = 3;
+	OCR0A = 2;
 }
 
 int main(void)
