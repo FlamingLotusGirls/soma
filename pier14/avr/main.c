@@ -22,7 +22,9 @@
 #include "uart.h"
 #include "config.h"
 #include "pins.h"
-#include "gamma_correction_table.h"
+#include "gamma_correction_table_1023.h"
+
+#define PWM_RESOLUTION 1023
 
 #ifdef OLD_PROTO
 	#include "proto.h"
@@ -71,7 +73,7 @@ ISR( TIMER0_COMPA_vect )
 	port = PORTC;
 
 	phase++;
-	if (phase > 511)
+	if (phase > PWM_RESOLUTION)
 		phase = 1;
 	tmp_phase = phase;
 
@@ -80,20 +82,20 @@ ISR( TIMER0_COMPA_vect )
 	else
 		port &= ~_BV(C_RED);
 
-	if (tmp_phase <= led_val[0])
-		tmp_phase += 511 - led_val[0];
-	else	
-		tmp_phase -= led_val[0];
+	// if (tmp_phase <= led_val[0])
+	// 	tmp_phase += PWM_RESOLUTION - led_val[0];
+	// else	
+	// 	tmp_phase -= led_val[0];
 
 	if (led_val[1] >= tmp_phase)
 		port |= _BV(C_GREEN);
 	else
 		port &= ~_BV(C_GREEN);
 
-	if (tmp_phase <= led_val[1])
-		tmp_phase += 511 - led_val[1];
-	else	
-		tmp_phase -= led_val[1];
+	// if (tmp_phase <= led_val[1])
+	// 	tmp_phase += PWM_RESOLUTION - led_val[1];
+	// else	
+	// 	tmp_phase -= led_val[1];
 
 	if (led_val[2] >= tmp_phase)
 		port |= _BV(C_BLUE);
@@ -116,9 +118,9 @@ void hw_setup(void)
 	/* enable output compare interrupt */
 	TIMSK0 = _BV(OCIE0A);
 
-	/* interrupt at 24 kHz (255 levels at 94 Hz PWM) */
+	/* interrupt at ~146 kHz (1024 levels at ~140 Hz PWM) */
 	TCCR0B = _BV(CS01) | _BV(CS00);
-	OCR0A = 2;
+	OCR0A = 1;
 }
 
 int main(void)
