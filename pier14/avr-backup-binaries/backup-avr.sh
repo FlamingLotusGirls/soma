@@ -17,7 +17,7 @@ else
     mkdir $prefix
 fi
 
-avrdude -c usbtiny -P usb -p m88p       \
+avrdude -c avrispv2 -P /dev/tty.usbmodem00079721 -p m88p       \
 	-U  hfuse:r:$prefix/hfuse.txt:h     \
 	-U  lfuse:r:$prefix/lfuse.txt:h     \
 	-U  efuse:r:$prefix/efuse.txt:h     \

@@ -48,5 +48,5 @@ close $fh;
 #system "hd $filename";
 #print "\n";
 
-system("avrdude -p atmega88p -P usb -c usbtiny -U eeprom:w:$filename:r") == 0
+system("avrdude -p atmega88p -c avrispv2 -P /dev/tty.usbmodem00079721 -U eeprom:w:$filename:r") == 0
     or die "avrdude died: $?\n";

@@ -276,13 +276,13 @@ LDFLAGS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 # Programming hardware: alf avr910 avrisp bascom bsd 
 # dt006 pavr picoweb pony-stk200 sp12 stk200 stk500
 #
-# Type: avrdude -c ?
+# Type:  -c ?
 # to get a full listing.
 #
-AVRDUDE_PROGRAMMER = usbtiny
+AVRDUDE_PROGRAMMER = avrispv2
 
 # com1 = serial port. Use lpt1 to connect to parallel port.
-AVRDUDE_PORT = usb
+AVRDUDE_PORT =  /dev/tty.usbmodem00079721
 
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 #AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(TARGET).eep
