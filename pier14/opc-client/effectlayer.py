@@ -116,4 +116,20 @@ class GammaLayer(EffectLayer):
         self.lutY = numpy.power(self.lutX, gamma)
 
     def render(self, model, params, frame):
-        frame[:] = numpy.interp(frame.reshape(-1), self.lutX, self.lutY).reshape(frame.shape)
+        pass
+        #frame[:] = numpy.interp(frame.reshape(-1), self.lutX, self.lutY).reshape(frame.shape)
+
+        
+class TriangleWaveLayer(EffectLayer):
+    """ Ramp the brightness in a triangle wave """
+    brightness = 0
+    step = 0.001
+    def render(self, model, params, frame):
+        if self.brightness >= 1:
+            self.step = -0.001
+        if self.brightness <= 0:
+            self.step = 0.001
+
+        color = numpy.array((1,1,1))
+        self.brightness += self.step
+        frame[:] = self.brightness * color
