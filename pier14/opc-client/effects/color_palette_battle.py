@@ -2,26 +2,21 @@ import math
 import random
 import numpy
 from effectlayer import *
+from effects.color_palette_library import *
 import random
 
 class ColorPaletteBattleLayer(EffectLayer):
 
     def __init__(self, model):
-        self.palette = self.generatePalette([0x441133, 0xcc3344, 0xbb6699, 0xff6655, 0xffddaa])
-        self.colors = [random.choice(self.palette) for i in range(model.numLEDs)]    
+        self.paletteLibrary = ColorPaletteLibrary()
+        self.initPalette(model)
         self.characteristicTime = 1/20. # average rate of color change for a single LED
         self.waitTimes = numpy.array([random.expovariate(self.characteristicTime) for i in range(model.numLEDs)])
         self.lastFrameTime = None
 
-    def generatePalette(self, hexValues):
-        def convertColor(val):
-            r = (val & 0xff0000) >> 16
-            g = (val & 0x00ff00) >> 8
-            b = (val & 0x0000ff)
-            return numpy.array([r/255., g/255., b/255.]) 
-
-        return [ convertColor(val) for val in hexValues ] 
-
+    def initPalette(self, model):
+        self.palette = self.paletteLibrary.getPalette()
+        self.colors = [random.choice(self.palette) for i in range(model.numLEDs)]    
 
     def render(self, model, params, frame):
         if not self.lastFrameTime:
