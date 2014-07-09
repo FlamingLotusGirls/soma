@@ -59,6 +59,24 @@ class SineWaveLayer(EffectLayer):
         # multplied with the color array to yield a Nx3 array
         frame[:] = cosines.reshape(-1,1) * self.color
 
+
+# step through the LEDs in order of frame index
+class AddressTestLayer(EffectLayer):
+    def __init__(self):
+        self.index = 0
+        self.switchInterval = 0.5
+        self.lastSwitchTime = None
+        self.color = numpy.array([1,1,1])
+
+    def render(self, model, params, frame):
+        if not self.lastSwitchTime:
+            self.lastSwitchTime = params.time
+        elif params.time - self.lastSwitchTime > self.switchInterval:
+            self.index = (self.index + 1) % model.numLEDs
+            self.lastSwitchTime = params.time
+
+        frame[self.index] = self.color
+
 def main(screen):
 
     # master parameters, used in rendering and updated by playlist advancer thread
@@ -100,7 +118,8 @@ def main(screen):
         #     # ColorBlinkyLayer(),
         # ],
         [
-            ColorWave(model),
+            AddressTestLayer(),
+            #ColorWave(model),
             # ColorWiper(model),
              # MultiplierLayer(ColorWave(model), ColorWiper(model)),
         ],
