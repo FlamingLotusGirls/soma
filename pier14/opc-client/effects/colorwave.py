@@ -5,7 +5,7 @@ from util import hsvColorAdd, jitter, colorJitter
 from effectlayer import EffectLayer 
 from colorsys import hsv_to_rgb, rgb_to_hsv
 
-CENTER_FREQ = 1.2 #Hz
+CENTER_FREQ = 0.6 #Hz
 
 def mutateColor(color, hue_jitter=0.1, sat_jitter=0.5, val_jitter=0.5):
     return hsvColorAdd(color, colorJitter(hue_jitter, sat_jitter, val_jitter) )
@@ -21,7 +21,7 @@ class ColorWave(EffectLayer):
             self.color = np.array([1,1,1])
         else:
             self.color = np.array([ random.random() for i in range(3) ])
-        self.colors = [ mutateColor(self.color) for i in range(self.model.numLEDs)]
+        self.colors = [ mutateColor(self.color, sat_jitter=0) for i in range(self.model.numLEDs)]
 
     def render(self, model, params, frame):
 

@@ -48,16 +48,14 @@ def main(screen):
         # [
         #     ColorPaletteBattleLayer(model)
         # ],
-        [
-            PhotoColorsLayer(model),
-            #InvertColorsLayer(),
-            InvertColorByRegionLayer(model),
-        ],
         # [
-            # ColorWave(model),
-            # ColorWiper(model),
-             # MultiplierLayer(ColorWave(model), ColorWiper(model)),
+            #PhotoColorsLayer(model),
+            #InvertColorsLayer(),
+            #InvertColorByRegionLayer(model),
         # ],
+        [
+            MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
+        ],
     ])
 
     # the renderer manages a playlist (or dict of multiple playlists), as well as transitions
