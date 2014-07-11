@@ -13,12 +13,22 @@ class ColorPaletteBattleLayer(EffectLayer):
         self.characteristicTime = 1/20. # average rate of color change for a single LED
         self.waitTimes = numpy.array([random.expovariate(self.characteristicTime) for i in range(model.numLEDs)])
         self.lastFrameTime = None
+        self.colorChangesInProgress = []
+        self.buttonColors = [self.palette[0], self.palette[-1]]
+        self.buttonDown = [False]*2
+        self.axonChaseStartTime = None
 
     def initPalette(self, model):
         self.palette = self.paletteLibrary.getPalette()
-        self.colors = [random.choice(self.palette) for i in range(model.numLEDs)]    
+        self.colors = [random.choice(self.palette) for i in range(model.numLEDs)]
 
     def render(self, model, params, frame):
+        if self.axonChaseStartTime:
+            self.renderAxonChase(model, params, frame)
+        else:
+            self.renderRestingState(model, params, frame)
+
+    def renderRestingState(self, model, params, frame):
         if not self.lastFrameTime:
             self.lastFrameTime = params.time
         delta = params.time - self.lastFrameTime
@@ -28,17 +38,61 @@ class ColorPaletteBattleLayer(EffectLayer):
 
         timedOut = numpy.where(self.waitTimes < 0)
 
-        accumulatorColors = []
-        if(params.buttonState[0]):
-            accumulatorColors.append(self.palette[4])
-        if(params.buttonState[1]):
-            accumulatorColors.append(self.palette[2])
+        for i in range(len(params.buttonState)):
+            if(params.buttonState[i] and not self.buttonDown[i]):
+                self.buttonDown[i] = True
+                self.initiateColorChange(self.buttonColors[i], params.time, model)
+            if not params.buttonState[i]:
+                self.buttonDown[i] = False
 
-        for i in timedOut[0]:
-            if i in model.lowerIndices and len(accumulatorColors):
-                self.colors[i] = random.choice(accumulatorColors)
+        for colorChange in self.colorChangesInProgress:
+            if colorChange['fadeOut']:
+                self.colors[colorChange['index']] = self.fadeToColor(self.colors[colorChange['index']], [1,1,1])
+                if numpy.array_equal(self.colors[colorChange['index']], [1,1,1]):
+                    colorChange['fadeOut'] = False
+                    print "fading in ", colorChange['index']
+
             else:
-                self.colors[i] = random.choice(self.palette)
+                self.colors[colorChange['index']] = self.fadeToColor(self.colors[colorChange['index']], colorChange['color'])
+                if numpy.array_equal(self.colors[colorChange['index']], colorChange['color']):
+                    print "Finished! ", colorChange['index']
+                    self.colorChangesInProgress.remove(colorChange)
+
+                
+        for i in timedOut[0]:
+            self.colors[i] = random.choice(self.palette)
             self.waitTimes[i] = random.expovariate(self.characteristicTime)
 
         frame[:] = self.colors
+
+    def initiateColorChange(self, color, time, model):
+        indices = random.sample(model.lowerIndices, len(model.lowerIndices))
+        indexToChange = -1
+        for i in range(len(indices)):
+            if (self.colors[indices[i]] != color).any():
+                indexToChange = i
+                break
+        if indexToChange > -1:
+            print indexToChange
+            print len(indices)
+            # self.colors[indices[indexToChange]] = color
+            self.colorChangesInProgress.append({'color': self.buttonColors[i], 'fadeOut': True, 'index': indices[indexToChange]})
+        else:
+            self.axonChaseStartTime = time
+            print 'YOU WIN'
+
+    def renderAxonChase(self, color, params, frame):
+        pass
+
+    def fadeToColor(self, fromColor, toColor):
+        stepSize = 0.005
+        diff = numpy.subtract(toColor, fromColor)
+        maxDifference = max(numpy.absolute(diff))
+        if maxDifference > stepSize:
+            amountToAdd = numpy.multiply(stepSize/maxDifference, diff)
+            return numpy.add(fromColor, amountToAdd)
+        else:
+            return toColor
+
+
+

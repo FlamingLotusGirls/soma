@@ -12,6 +12,7 @@ from effects.colorwiper import ColorWiper
 from effects.invert import InvertColorsLayer, InvertColorByRegionLayer
 from effects.color_palette_battle import *
 from effects.photo_colors import *
+from effects.clamp import *
 from playlist import Playlist
 from threads import PlaylistAdvanceThread, KeyboardMonitorThread
 from random import random
@@ -45,14 +46,13 @@ def main(screen):
         #    RandomPhaseLayer(model),
         #    ColorCycleLayer(0.00003, 0.0001)
         # ],
-        # [
-        #     ColorPaletteBattleLayer(model)
-        # ],
-        # [
-            #PhotoColorsLayer(model),
-            #InvertColorsLayer(),
-            #InvertColorByRegionLayer(model),
-        # ],
+        [
+            ColorPaletteBattleLayer(model)
+        ],
+        [
+            PhotoColorsLayer(model),
+            BrightnessStateMachineLayer()
+        ],
         [
             MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
         ],
