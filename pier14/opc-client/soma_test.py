@@ -104,9 +104,9 @@ def main(screen):
         #    RandomPhaseLayer(model),
         #    ColorCycleLayer()
         # ],
-        [
-            ColorPaletteBattleLayer(model)
-        ],
+        # [
+        #     ColorPaletteBattleLayer(model)
+        # ],
         # [
            #PhotoColorsLayer(model),
            # InvertColorsLayer(),
