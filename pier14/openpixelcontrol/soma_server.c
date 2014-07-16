@@ -341,7 +341,7 @@ void handler(u8 channel, u16 count, pixel* p)
     for (i = 0; i < count && i < num_leds; i++)
         leds[i].p = p[i];
 
-    printf("Channel %d, %d pixels\n", channel, count);
+    //printf("Channel %d, %d pixels\n", channel, count);
     refresh();
 }
 
