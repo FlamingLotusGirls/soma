@@ -114,6 +114,10 @@ int serial_open(char *device, uint32_t baud)
     struct termios options, options_new;
 
     switch (baud) {
+        case 300:    baud = B300;    break;
+        case 1200:   baud = B1200;   break;
+        case 2400:   baud = B2400;   break;
+        case 4800:   baud = B4800;   break;
         case 9600:   baud = B9600;   break;
         case 19200:  baud = B19200;  break;
         case 38400:  baud = B38400;  break;
@@ -330,7 +334,8 @@ void refresh()
     }
 }
 
-void handler(u8 channel, u16 count, pixel* p) {
+void handler(u8 channel, u16 count, pixel* p)
+{
     int i;
 
     for (i = 0; i < count && i < num_leds; i++)
@@ -430,7 +435,7 @@ int main(int argc, char *argv[])
     char *optstring = "l:s:f:p:o";
 
     while (1) {
-        c = getopt_long (argc, argv, optstring, long_options, &option_index);
+        c = getopt_long(argc, argv, optstring, long_options, &option_index);
         if (c == -1)
             break;
 
