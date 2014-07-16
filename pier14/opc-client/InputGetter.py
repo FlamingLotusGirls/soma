@@ -43,12 +43,12 @@ class KeyboardInputGetter(InputGetter):
                 effectparams.buttonTimeSinceStateChange[i] = time.time() - self.cachedTimes[i]
 
 # Button input getter checks to see if there's a node
-# in /dev. If there is - its a sign of a button press.
+# in /var/run/soma. If there is - its a sign of a button press.
 # If node is not present - it means that the button
 # is not pressed. It is assumed that there's another
 # daemon process that runs in parallel to control the nodes
 class ButtonInputGetter(InputGetter):
-    BUTTON_DEV_PATH = '/dev/button'
+    BUTTON_DEV_PATH = '/var/run/soma/button'
     button_id = ["A", "B"]
 
     class Button:
