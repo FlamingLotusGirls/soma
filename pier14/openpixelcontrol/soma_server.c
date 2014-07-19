@@ -473,6 +473,8 @@ int main(int argc, char *argv[])
     if (old_proto)
         fprintf(stderr, "Using old protocol\n");
 
+    setlinebuf(stdout);
+
     fd = serial_open(device, baud);
     source = opc_new_source(port);
     refresh();
