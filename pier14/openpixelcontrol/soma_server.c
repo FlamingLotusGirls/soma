@@ -24,6 +24,7 @@
 #include <string.h>
 #include <assert.h>
 #include <getopt.h>
+#include <sys/time.h>
 
 #include "opc/opc.h"
 
@@ -69,6 +70,8 @@ uint32_t baud = 230400; // 115200*2
 char *device, *config;
 int old_proto;
 int fd;
+double sample_time = 5;
+uint32_t frames;
 
 opc_source source = -1;
 
@@ -343,11 +346,12 @@ void handler(u8 channel, u16 count, pixel* p)
 
     //printf("Channel %d, %d pixels\n", channel, count);
     refresh();
+    frames++;
 }
 
 void usage(char *name)
 {
-    fprintf(stderr, "Usage: %s -f <configfile> -l <device> [-s <speed>] [-p <port>]\n", name);
+    fprintf(stderr, "Usage: %s -f <configfile> -l <device> [-s <speed>] [-p <port>] [-n <sample_time>]\n", name);
     exit(1);
 }
 
@@ -432,7 +436,7 @@ int main(int argc, char *argv[])
         { 0, 0, 0, 0}
     };
 
-    char *optstring = "l:s:f:p:o";
+    char *optstring = "l:s:f:p:on:";
 
     while (1) {
         c = getopt_long(argc, argv, optstring, long_options, &option_index);
@@ -440,11 +444,12 @@ int main(int argc, char *argv[])
             break;
 
         switch (c) {
-            case 'f': config    = optarg;       break;
-            case 'l': device    = optarg;       break;
-            case 's': baud      = atoi(optarg); break;
-            case 'p': port      = atoi(optarg); break;
-            case 'o': old_proto = 1;            break;
+            case 'f': config      = optarg;       break;
+            case 'l': device      = optarg;       break;
+            case 's': baud        = atoi(optarg); break;
+            case 'p': port        = atoi(optarg); break;
+            case 'o': old_proto   = 1;            break;
+            case 'n': sample_time = atof(optarg); break;
 
             default:
                 usage(argv[0]);
@@ -457,6 +462,11 @@ int main(int argc, char *argv[])
     if (!device)
         usage(argv[0]);
 
+    if (sample_time <= 0) {
+        fprintf(stderr, "sample_time must be greater than 0\n");
+        exit(1);
+    }
+
     read_config(config);
     fprintf(stderr, "Using device %s, baud %d\n", device, baud);
 
@@ -467,8 +477,22 @@ int main(int argc, char *argv[])
     source = opc_new_source(port);
     refresh();
 
-    while (1)
-        opc_receive(source, handler, 250);
+    while (1) {
+        struct timeval now, start, diff;
+        double seconds;
+
+        gettimeofday(&start, NULL);
+        frames = 0;
+
+        do {
+            opc_receive(source, handler, 100);
+            gettimeofday(&now, NULL);
+            timersub(&now, &start, &diff);
+            seconds = diff.tv_sec + diff.tv_usec/1000000;
+        } while (seconds < sample_time);
+
+        printf("%.1f frames/second\n", frames/seconds);
+    }
 
     return 0;
 }
