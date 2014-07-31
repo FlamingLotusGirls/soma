@@ -186,8 +186,8 @@ class AddressTestLayer(EffectLayer):
         self.switchInterval = 0.5
         self.lastSwitchTime = None
         self.color = numpy.array([1,0,0])
-        self.first = 14
-        self.last = 40 #None
+        self.first = 0
+        self.last = 5 #None
 
     def render(self, model, params, frame):
         if not self.last:
