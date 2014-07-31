@@ -54,9 +54,9 @@ class PhotoColorsLayer(EffectLayer):
                frame[i] = self.pixelIter.next()
             self.lastFrame = frame
         else:
-            # Shift the last frame over by one
-            for i in xrange(len(frame)-1):
-                frame[i] = self.lastFrame[i+1]
             # add a new pixel from the stream
-            frame[-1] = self.pixelIter.next()
+            frame[0] = self.pixelIter.next()
+            # Shift the last frame over by one
+            for i in xrange(1, len(frame)):
+                frame[i] = self.lastFrame[i-1]
             self.lastFrame = numpy.copy(frame)
