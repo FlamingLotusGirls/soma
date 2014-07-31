@@ -14,8 +14,9 @@ from effects.color_palette_battle import *
 from effects.photo_colors import *
 from effects.clamp import *
 from effects.dim_bright_button_layer import *
+from effects.button_flash import ButtonFlash
 from playlist import Playlist
-from threads import PlaylistAdvanceThread, KeyboardMonitorThread
+from threads import PlaylistAdvanceThread, KeyboardMonitorThread, ButtonMonitorThread
 from random import random
 from math import *
 import os
@@ -37,13 +38,15 @@ def main(screen):
         keymonitor = KeyboardMonitorThread(masterParams, screen)
         keymonitor.start()
 
+    else:
+        ButtonMonitorThread(masterParams).start()
+
     model = SomaModel()
 
     # a playlist. each entry in a playlist can contain one or more effect layers
     # (if more than one, they are all rendered into the same frame...mixing method
     # is determined by individual effect layers' render implementations)
     playlist = Playlist([
-        [
            RandomPhaseLayer(model),
            ColorCycleLayer(0.00003, 0.0001)
         ],
@@ -78,10 +81,11 @@ def main(screen):
 
 
 if __name__ == '__main__':
-    try:
-        # try to import curses for keyboard button emulator
-        import curses.wrapper
-        curses.wrapper(main)
-    except ImportError:
-        # otherwise just run main with no curses screen
-        main(None)
+    #try:
+    #    # try to import curses for keyboard button emulator
+    #    import curses.wrapper
+    #    curses.wrapper(main)
+    #except ImportError:
+    #    # otherwise just run main with no curses screen
+    #    main(None)
+    main(None)

@@ -185,13 +185,18 @@ class AddressTestLayer(EffectLayer):
         self.index = 0
         self.switchInterval = 0.5
         self.lastSwitchTime = None
-        self.color = numpy.array([1,1,1])
+        self.color = numpy.array([1,0,0])
+        self.first = 14
+        self.last = 40 #None
 
     def render(self, model, params, frame):
+        if not self.last:
+            self.last = model.numLEDs
+
         if not self.lastSwitchTime:
             self.lastSwitchTime = params.time
         elif params.time - self.lastSwitchTime > self.switchInterval:
-            self.index = (self.index + 1) % model.numLEDs
+            self.index = (self.index + 1) % (self.last-self.first) #model.numLEDs
             self.lastSwitchTime = params.time
 
-        frame[self.index] = self.color
+        frame[self.first + self.index] = self.color

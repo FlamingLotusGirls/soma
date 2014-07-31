@@ -35,3 +35,15 @@ class KeyboardMonitorThread(Thread):
             self.getter.update(self.params)
             self.buttonGetter.update(self.params)
             time.sleep(0.05)
+
+class ButtonMonitorThread(Thread):
+    def __init__(self, params):
+        Thread.__init__(self)
+        self.daemon = True
+        self.params = params
+        self.buttonGetter = ButtonInputGetter()
+
+    def run(self):
+        while True:
+            self.buttonGetter.update(self.params)
+            time.sleep(0.05)
