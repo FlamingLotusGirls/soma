@@ -3,16 +3,19 @@ import random
 import numpy
 from effectlayer import *
 import png
+import glob
 
 class PhotoColorsLayer(EffectLayer):
 
-    def __init__(self, model, image="images/light_fixture.png"):
-        self.image = image
-        self.file = open(image)
+    def __init__(self, model):
+        images = glob.glob("images/*.png")
+        self.image = random.choice(images)
+        self.file = open(self.image)
         reader = png.Reader(self.file)
         self.lastFrame = None
         print "reading photo"
         photo = reader.read()
+        print self.image
         print "width", photo[0]
         print "height", photo[1]
         print "metadata", photo[3]
@@ -21,17 +24,15 @@ class PhotoColorsLayer(EffectLayer):
         self.photoSize = photo[0] * photo[1]
         self.rows = photo[2]
         self.offset = 0
-        self.pixelIter = self._pixelIter()
+        self.pixelIter = self._pixelIter(photo)
 
-    def _pixelIter(self):
+    def _pixelIter(self, photo):
         """
         Infinitely iterate over pixels in the image.
         """
         while True:
             # Generate a new row iterator
-            self.file.seek(0)
-            reader = png.Reader(self.file)
-            rowIter = reader.read()[2]
+            rowIter = photo[2]
             for row in rowIter:
                 width = len(row)
                 i = 0
