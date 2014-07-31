@@ -13,6 +13,7 @@ from effects.invert import InvertColorsLayer, InvertColorByRegionLayer
 from effects.color_palette_battle import *
 from effects.photo_colors import *
 from effects.clamp import *
+from effects.dim_bright_button_layer import *
 from playlist import Playlist
 from threads import PlaylistAdvanceThread, KeyboardMonitorThread
 from random import random
@@ -42,16 +43,16 @@ def main(screen):
     # (if more than one, they are all rendered into the same frame...mixing method
     # is determined by individual effect layers' render implementations)
     playlist = Playlist([
+        [
+           RandomPhaseLayer(model),
+           ColorCycleLayer(0.00003, 0.0001)
+        ],
         # [
-        #    RandomPhaseLayer(model),
-        #    ColorCycleLayer(0.00003, 0.0001)
+            # ColorPaletteBattleLayer(model)
         # ],
         [
-            ColorPaletteBattleLayer(model)
-        ],
-        [
             PhotoColorsLayer(model),
-            BrightnessStateMachineLayer()
+            DimBrightButtonLayer()
         ],
         [
             MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
