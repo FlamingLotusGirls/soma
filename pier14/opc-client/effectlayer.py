@@ -175,7 +175,7 @@ class TestPatternLayer(EffectLayer):
 
         cosine = numpy.cos(elapsedTime * 2 * pi);
 
-        frame[:] = cosine * numpy.array([1,1,1])
+        frame[:] = cosine * numpy.array([1,0,0])
 
 
 
@@ -186,8 +186,8 @@ class AddressTestLayer(EffectLayer):
         self.switchInterval = 0.5
         self.lastSwitchTime = None
         self.color = numpy.array([1,0,0])
-        self.first = 0
-        self.last = 5 #None
+        self.first = 50
+        self.last = 60
 
     def render(self, model, params, frame):
         if not self.last:

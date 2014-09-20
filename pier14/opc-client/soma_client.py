@@ -47,12 +47,8 @@ def main(screen):
     # (if more than one, they are all rendered into the same frame...mixing method
     # is determined by individual effect layers' render implementations)
     playlist = Playlist([
-           RandomPhaseLayer(model),
-           ColorCycleLayer(0.00003, 0.0001)
-        ],
-        # [
-            # ColorPaletteBattleLayer(model)
-        # ],
+	   #[TestPatternLayer()],
+	   #[AddressTestLayer()],
         [
             PhotoColorsLayer(model),
             DimBrightButtonLayer()
@@ -60,6 +56,13 @@ def main(screen):
         [
             MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
         ],
+        [
+           RandomPhaseLayer(model),
+           ColorCycleLayer(0.00003, 0.0001)
+        ],
+        # [
+            # ColorPaletteBattleLayer(model)
+        # ],
     ])
 
     # the renderer manages a playlist (or dict of multiple playlists), as well as transitions
