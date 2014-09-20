@@ -1,14 +1,17 @@
+PROJ = soma_server
+OBJS = soma_server.o opc/opc_server.o
+
 CC = gcc
 CFLAGS = -Wall -Werror
 
-all: soma_server
+all: $(PROJ)
 
-soma_server: soma_server.c opc/opc_server.c
+$(PROJ): $(OBJS)
 
-run: soma_server
-	./soma_server -f config.txt -l /dev/ttyUSB*
+run: $(PROJ)
+	./$(PROJ) -f config.txt -l /dev/ttyUSB*
 
 clean:
-	rm -f soma_server
+	rm -f $(PROJ) $(OBJS)
 
 anyway: clean all

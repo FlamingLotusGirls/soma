@@ -178,18 +178,22 @@ int serial_open(char *device, uint32_t baud)
     return fd;
 }
 
-void serial_write(uint8_t *buf, size_t count)
+void serial_write(uint8_t *p, size_t len)
 {
-    ssize_t n = write(fd, buf, count);
+    while (len) {
+        ssize_t n = write(fd, p, len);
 
-    if (n < 0) {
-        perror("write");
-        exit(1);
-    }
+        if (n < 0) {
+            perror("write");
+            exit(1);
+        }
 
-    if (n != count) {
-        fprintf(stderr, "Short write:  Tired to write %zd, only wrote %zd\n", count, n);
-        exit(1);
+        if (n != len) {
+            fprintf(stderr, "warning: Short write: Tired to write %zd bytes, only wrote %zd\n", len, n);
+        }
+
+        len -= n;
+        p += n;
     }
 }
 
