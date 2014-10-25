@@ -17,6 +17,5 @@ class MonoLayer(EffectLayer):
         for i in range(0,len):
             singleFrame = frame[i]
             hsv = numpy.array(rgb_to_hsv(singleFrame[0], singleFrame[1], singleFrame[2]))
-            foo = numpy.array(hsv_to_rgb(16/360, 1.0, hsv[2]))
-            frame[i] = numpy.array(hsv_to_rgb(self.hue, 1.0, hsv[2]))
+            frame[i] = numpy.array(hsv_to_rgb(self.hue, (hsv[1]+0.5) / 1.5, hsv[2]))
             

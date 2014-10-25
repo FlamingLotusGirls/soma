@@ -15,6 +15,7 @@ from effects.photo_colors import *
 from effects.clamp import *
 from effects.dim_bright_button_layer import *
 from effects.button_flash import ButtonFlash
+from effects.mono import MonoLayer
 from playlist import Playlist
 from threads import PlaylistAdvanceThread, KeyboardMonitorThread, ButtonMonitorThread
 from random import random
@@ -51,14 +52,17 @@ def main(screen):
 	   #[AddressTestLayer()],
         [
             PhotoColorsLayer(model),
-            DimBrightButtonLayer()
+            DimBrightButtonLayer(),
+            MonoLayer(),
         ],
         [
             MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
+            MonoLayer(),
         ],
         [
            RandomPhaseLayer(model),
-           ColorCycleLayer(0.00003, 0.0001)
+           ColorCycleLayer(0.00003, 0.0001),
+           MonoLayer(),
         ],
         # [
             # ColorPaletteBattleLayer(model)
