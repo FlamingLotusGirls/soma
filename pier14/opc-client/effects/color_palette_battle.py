@@ -50,12 +50,10 @@ class ColorPaletteBattleLayer(EffectLayer):
                 self.colors[colorChange['index']] = self.fadeToColor(self.colors[colorChange['index']], [1,1,1])
                 if numpy.array_equal(self.colors[colorChange['index']], [1,1,1]):
                     colorChange['fadeOut'] = False
-                    print "fading in ", colorChange['index']
 
             else:
                 self.colors[colorChange['index']] = self.fadeToColor(self.colors[colorChange['index']], colorChange['color'])
                 if numpy.array_equal(self.colors[colorChange['index']], colorChange['color']):
-                    print "Finished! ", colorChange['index']
                     self.colorChangesInProgress.remove(colorChange)
 
                 
@@ -70,13 +68,14 @@ class ColorPaletteBattleLayer(EffectLayer):
         indexToChange = -1
         for i in range(len(indices)):
             if (self.colors[indices[i]] != color).any():
-                indexToChange = i
-                break
+                if indices[i] not in [colorChange['index'] for colorChange in self.colorChangesInProgress]:
+                    indexToChange = i
+                    break
         if indexToChange > -1:
-            print indexToChange
-            print len(indices)
             # self.colors[indices[indexToChange]] = color
-            self.colorChangesInProgress.append({'color': self.buttonColors[i], 'fadeOut': True, 'index': indices[indexToChange]})
+            print indices[indexToChange]
+            #self.colors[indices[indexToChange]] = color
+            self.colorChangesInProgress.append({'color': color, 'fadeOut': True, 'index': indices[indexToChange]})
         else:
             self.axonChaseStartTime = time
             print 'YOU WIN'
@@ -85,7 +84,7 @@ class ColorPaletteBattleLayer(EffectLayer):
         pass
 
     def fadeToColor(self, fromColor, toColor):
-        stepSize = 0.005
+        stepSize = 0.008
         diff = numpy.subtract(toColor, fromColor)
         maxDifference = max(numpy.absolute(diff))
         if maxDifference > stepSize:
