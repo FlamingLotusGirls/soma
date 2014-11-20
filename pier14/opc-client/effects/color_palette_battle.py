@@ -17,6 +17,12 @@ class ColorPaletteBattleLayer(EffectLayer):
         self.buttonColors = [self.palette[0], self.palette[-1]]
         self.buttonDown = [False]*2
         self.axonChaseStartTime = None
+        self.axonChaseDuration = 4
+
+        # Extract axon point positions in one dimension (they are normalized already)
+        self.normalized_x_coords = model.nodes[:,1][range(model.numLEDs)]
+        self.winningColor = None
+        
 
     def initPalette(self, model):
         self.palette = self.paletteLibrary.getPalette()
@@ -24,11 +30,14 @@ class ColorPaletteBattleLayer(EffectLayer):
 
     def render(self, model, params, frame):
         if self.axonChaseStartTime:
-            self.renderAxonChase(model, params, frame)
+            self.renderAxonChase(model, params)
         else:
-            self.renderRestingState(model, params, frame)
+            self.renderRestingState(model, params)
 
-    def renderRestingState(self, model, params, frame):
+        frame[:] = self.colors
+        return frame
+
+    def renderRestingState(self, model, params):
         if not self.lastFrameTime:
             self.lastFrameTime = params.time
         delta = params.time - self.lastFrameTime
@@ -61,7 +70,7 @@ class ColorPaletteBattleLayer(EffectLayer):
             self.colors[i] = random.choice(self.palette)
             self.waitTimes[i] = random.expovariate(self.characteristicTime)
 
-        frame[:] = self.colors
+        
 
     def initiateColorChange(self, color, time, model):
         indices = random.sample(model.lowerIndices, len(model.lowerIndices))
@@ -78,13 +87,24 @@ class ColorPaletteBattleLayer(EffectLayer):
             self.colorChangesInProgress.append({'color': color, 'fadeOut': True, 'index': indices[indexToChange]})
         else:
             self.axonChaseStartTime = time
+            self.winningColor = color
             print 'YOU WIN'
 
-    def renderAxonChase(self, color, params, frame):
-        pass
+    def renderAxonChase(self, model, params):
+        chaseFraction = (params.time-self.axonChaseStartTime)/self.axonChaseDuration
+        if chaseFraction > 2:
+            self.__init__(model)
+            return 
+
+        for i in range(model.numLEDs):
+            if self.normalized_x_coords[i] > (1-chaseFraction):
+                self.colors[i] = self.winningColor
+        
+
+        
 
     def fadeToColor(self, fromColor, toColor):
-        stepSize = 0.008
+        stepSize = 0.01
         diff = numpy.subtract(toColor, fromColor)
         maxDifference = max(numpy.absolute(diff))
         if maxDifference > stepSize:
