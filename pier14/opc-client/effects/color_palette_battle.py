@@ -13,7 +13,7 @@ class ColorPaletteBattleLayer(EffectLayer):
         self.characteristicTime = 1/20. # average rate of color change for a single LED
         self.waitTimes = numpy.array([random.expovariate(self.characteristicTime) for i in range(model.numLEDs)])
         self.lastFrameTime = None
-        self.colorChangesInProgress = []
+        self.colorChangesInProgress = {}
         self.buttonColors = [self.palette[0], self.palette[-1]]
         self.buttonDown = [False]*2
         self.axonChaseStartTime = None
@@ -22,7 +22,7 @@ class ColorPaletteBattleLayer(EffectLayer):
         # Extract axon point positions in one dimension (they are normalized already)
         self.normalized_x_coords = model.nodes[:,1][range(model.numLEDs)]
         self.winningColor = None
-        
+
 
     def initPalette(self, model):
         self.palette = self.paletteLibrary.getPalette()
@@ -54,37 +54,39 @@ class ColorPaletteBattleLayer(EffectLayer):
             if not params.buttonState[i]:
                 self.buttonDown[i] = False
 
-        for colorChange in self.colorChangesInProgress:
+        colors_to_remove = []
+        for led_index, colorChange in self.colorChangesInProgress.items():
             if colorChange['fadeOut']:
-                self.colors[colorChange['index']] = self.fadeToColor(self.colors[colorChange['index']], [1,1,1])
-                if numpy.array_equal(self.colors[colorChange['index']], [1,1,1]):
+                self.colors[led_index] = self.fadeToColor(self.colors[led_index], [1,1,1], stepSize=0.05)
+                if numpy.array_equal(self.colors[led_index], [1,1,1]):
                     colorChange['fadeOut'] = False
 
             else:
-                self.colors[colorChange['index']] = self.fadeToColor(self.colors[colorChange['index']], colorChange['color'])
-                if numpy.array_equal(self.colors[colorChange['index']], colorChange['color']):
-                    self.colorChangesInProgress.remove(colorChange)
+                self.colors[led_index] = self.fadeToColor(self.colors[led_index], colorChange['color'])
+                if numpy.array_equal(self.colors[led_index], colorChange['color']):
+                    colors_to_remove.append(led_index)
+        for led_index in colors_to_remove:
+            del self.colorChangesInProgress[led_index]
 
-                
+
+
         for i in timedOut[0]:
             self.colors[i] = random.choice(self.palette)
             self.waitTimes[i] = random.expovariate(self.characteristicTime)
 
-        
+
 
     def initiateColorChange(self, color, time, model):
         indices = random.sample(model.lowerIndices, len(model.lowerIndices))
         indexToChange = -1
         for i in range(len(indices)):
             if (self.colors[indices[i]] != color).any():
-                if indices[i] not in [colorChange['index'] for colorChange in self.colorChangesInProgress]:
+                if indices[i] not in self.colorChangesInProgress:
                     indexToChange = i
                     break
         if indexToChange > -1:
-            # self.colors[indices[indexToChange]] = color
             print indices[indexToChange]
-            #self.colors[indices[indexToChange]] = color
-            self.colorChangesInProgress.append({'color': color, 'fadeOut': True, 'index': indices[indexToChange]})
+            self.colorChangesInProgress[indices[indexToChange]] = {'color': color, 'fadeOut': True}
         else:
             self.axonChaseStartTime = time
             self.winningColor = color
@@ -94,17 +96,16 @@ class ColorPaletteBattleLayer(EffectLayer):
         chaseFraction = (params.time-self.axonChaseStartTime)/self.axonChaseDuration
         if chaseFraction > 2:
             self.__init__(model)
-            return 
+            return
 
         for i in range(model.numLEDs):
             if self.normalized_x_coords[i] > (1-chaseFraction):
                 self.colors[i] = self.winningColor
-        
 
-        
 
-    def fadeToColor(self, fromColor, toColor):
-        stepSize = 0.01
+
+
+    def fadeToColor(self, fromColor, toColor, stepSize=0.02):
         diff = numpy.subtract(toColor, fromColor)
         maxDifference = max(numpy.absolute(diff))
         if maxDifference > stepSize:

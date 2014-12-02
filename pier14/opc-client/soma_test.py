@@ -61,9 +61,9 @@ def main(screen):
         #    RandomPhaseLayer(model),
         #    ColorCycleLayer()
         # ],
-        # [
-        #     ColorPaletteBattleLayer(model)
-        # ],
+        [
+           ColorPaletteBattleLayer(model)
+        ],
         # [
            #PhotoColorsLayer(model),
            # InvertColorsLayer(),
@@ -74,13 +74,13 @@ def main(screen):
         #     # SomaTestLayer(),
         #     # ColorBlinkyLayer(),
         # ],
-        [
+        #[
             #AddressTestLayer(),
-            TestPatternLayer(),
+            #TestPatternLayer(),
             #ColorWave(model),
             # ColorWiper(model),
              # MultiplierLayer(ColorWave(model), ColorWiper(model)),
-        ],
+        #],
         # [
             # FireflySwarmLayer(),
             # ButtonTestLayer()
