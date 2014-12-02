@@ -14,6 +14,8 @@ from effects.colorwiper import ColorWiper
 from effects.invert import InvertColorsLayer, InvertColorByRegionLayer
 from effects.color_palette_battle import *
 from effects.photo_colors import *
+from effects.dim_bright_button_layer import *
+from effects.specklayer import *
 from playlist import Playlist
 from threads import PlaylistAdvanceThread, KeyboardMonitorThread
 from random import random
@@ -74,13 +76,22 @@ def main(screen):
         #     # SomaTestLayer(),
         #     # ColorBlinkyLayer(),
         # ],
-        #[
-            #AddressTestLayer(),
-            #TestPatternLayer(),
-            #ColorWave(model),
-            # ColorWiper(model),
-             # MultiplierLayer(ColorWave(model), ColorWiper(model)),
-        #],
+        # [
+        #     PhotoColorsLayer(model),
+        #     DimBrightButtonLayer(),
+
+        #     # ColorWave(model),
+        #     SpeckLayer(button=0),
+        #     SpeckLayer(button=1),
+
+        #     #PhotoColorsLayer(model),
+        #     #DimBrightButtonLayer()
+        #     #AddressTestLayer(),
+        #     #TestPatternLayer(),
+        #     #ColorWave(model),
+        #     # ColorWiper(model),
+        #      # MultiplierLayer(ColorWave(model), ColorWiper(model)),
+        # ],
         # [
             # FireflySwarmLayer(),
             # ButtonTestLayer()

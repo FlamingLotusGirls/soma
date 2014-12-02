@@ -15,6 +15,7 @@ from effects.photo_colors import *
 from effects.clamp import *
 from effects.dim_bright_button_layer import *
 from effects.button_flash import ButtonFlash
+from effects.specklayer import SpeckLayer
 from playlist import Playlist
 from threads import PlaylistAdvanceThread, KeyboardMonitorThread, ButtonMonitorThread
 from random import random
@@ -51,7 +52,9 @@ def main(screen):
 	   #[AddressTestLayer()],
         [
             PhotoColorsLayer(model),
-            DimBrightButtonLayer()
+            DimBrightButtonLayer(),
+            SpeckLayer(button=0),
+            SpeckLayer(button=1)
         ],
         [
             MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
@@ -60,9 +63,9 @@ def main(screen):
            RandomPhaseLayer(model),
            ColorCycleLayer(0.00003, 0.0001)
         ],
-        # [
-            # ColorPaletteBattleLayer(model)
-        # ],
+        [
+            ColorPaletteBattleLayer(model)
+        ],
     ])
 
     # the renderer manages a playlist (or dict of multiple playlists), as well as transitions
