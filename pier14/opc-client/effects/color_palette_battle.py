@@ -14,7 +14,6 @@ class ColorPaletteBattleLayer(EffectLayer):
         self.waitTimes = numpy.array([random.expovariate(self.characteristicTime) for i in range(model.numLEDs)])
         self.lastFrameTime = None
         self.colorChangesInProgress = {}
-        self.buttonColors = [self.palette[0], self.palette[-1]]
         self.buttonDown = [False]*2
         self.axonChaseStartTime = None
         self.axonChaseDuration = 4
@@ -25,8 +24,10 @@ class ColorPaletteBattleLayer(EffectLayer):
 
 
     def initPalette(self, model):
-        self.palette = self.paletteLibrary.getPalette()
-        self.colors = [random.choice(self.palette) for i in range(model.numLEDs)]
+        palette = self.paletteLibrary.getPalette()
+        self.buttonColors = [palette[0], palette[-1]]
+        self.nonButtonColors = palette[1:-1]
+        self.colors = [random.choice(self.nonButtonColors) for i in range(model.numLEDs)]
 
     def render(self, model, params, frame):
         if self.axonChaseStartTime:
@@ -71,7 +72,7 @@ class ColorPaletteBattleLayer(EffectLayer):
 
 
         for i in timedOut[0]:
-            self.colors[i] = random.choice(self.palette)
+            self.colors[i] = random.choice(self.nonButtonColors)
             self.waitTimes[i] = random.expovariate(self.characteristicTime)
 
 
