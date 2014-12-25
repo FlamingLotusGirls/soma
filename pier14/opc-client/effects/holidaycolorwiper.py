@@ -12,9 +12,17 @@ class HolidayColorWiper(EffectLayer):
         self.hueDelta = .27 # add this to the hue on each transition
         self.buttonDown = False
         self.wipeStartTime = None # should be None if no wipe is in progress
+        self.change_every = timer
         self.colorPalette = [np.array(color) / 255.0 for color in colors]
         self.color = self.getColor()
+        self.resetTimer()
         self.oldColor = None # ""
+
+    def resetTimer(self):
+        self.changeTime = time.time()
+
+    def time_since_change(self):
+        return time.time() - self.changeTime
 
     def getColor(self):
         if self.colorPalette:
@@ -34,17 +42,28 @@ class HolidayColorWiper(EffectLayer):
         else:
             return hsvColorAdd(self.color, (self.hueDelta, 0, 0))
 
+
+    def startWipe(self):
+        self.wipeStartTime = time.time()
+        self.oldColor = self.color
+        self.color = self.nextColor()
+
+
     def setWipeStateFromButtons(self, params):
         """ if we detect a new button-press and aren't already in the middle of a wipe,
         set a new color and make the current color the old color """
         if (params.buttonState[0] or params.buttonState[1]):
             if not self.buttonDown and not self.wipeStartTime:
                 self.buttonDown = True
-                self.wipeStartTime = time.time()
-                self.oldColor = self.color
-                self.color = self.nextColor()
+                self.startWipe()
         else:
             self.buttonDown = False
+
+    def setWipeStateFromTimer(self):
+        if self.change_every:
+            if self.time_since_change() >= self.change_every:
+                self.startWipe()
+                self.resetTimer()
 
     def wipePercentCompleted(self):
         if self.wipeStartTime is not None:
@@ -54,6 +73,7 @@ class HolidayColorWiper(EffectLayer):
 
     def render(self, model, params, frame):
         self.setWipeStateFromButtons(params)
+        self.setWipeStateFromTimer()
         percentDone = self.wipePercentCompleted()
 
         # if the wipe is complete, clear its state so another wipe can be initiated
