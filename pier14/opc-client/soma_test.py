@@ -11,6 +11,7 @@ from effects.random_blink_cycle import *
 from effects.chase import AxonChaseLayer
 from effects.colorwave import ColorWave
 from effects.colorwiper import ColorWiper
+from effects.holidaycolorwiper import HolidayColorWiper
 from effects.invert import InvertColorsLayer, InvertColorByRegionLayer
 from effects.color_palette_battle import *
 from effects.photo_colors import *
@@ -63,8 +64,11 @@ def main(screen):
         #    RandomPhaseLayer(model),
         #    ColorCycleLayer()
         # ],
-        [
-           ColorPaletteBattleLayer(model)
+        # [
+        #    ColorPaletteBattleLayer(model)
+        # ],
+        [HolidayColorWiper(model,
+            colors=[(204,31,31), (36,143,0), (255,255,255)])
         ],
         # [
            #PhotoColorsLayer(model),

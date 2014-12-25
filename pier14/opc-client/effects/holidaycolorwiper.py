@@ -1,18 +1,38 @@
 import time
 import numpy as np
+import random
 from util import randomColor, hsvColorAdd
 from effectlayer import EffectLayer
 from colorsys import hsv_to_rgb, rgb_to_hsv
 
-class ColorWiper(EffectLayer):
-    def __init__(self, model):
+class HolidayColorWiper(EffectLayer):
+    def __init__(self, model, colors=None, timer=None):
         self.model = model
         self.wipeDuration = 1
         self.hueDelta = .27 # add this to the hue on each transition
         self.buttonDown = False
         self.wipeStartTime = None # should be None if no wipe is in progress
-        self.color = randomColor()
+        self.colorPalette = [np.array(color) / 255.0 for color in colors]
+        self.color = self.getColor()
         self.oldColor = None # ""
+
+    def getColor(self):
+        if self.colorPalette:
+            idx = random.randrange(0, len(self.colorPalette))
+            self.color_idx = idx
+            return self.colorPalette[idx]
+        else:
+            return randomColor()
+
+    def nextColor(self):
+        """ If a color palette is set, move to the next color in the palette,
+            otherwise, move around the color wheel by self.hueDelta
+        """
+        if self.colorPalette:
+            self.color_idx = (self.color_idx + 1) % len(self.colorPalette)
+            return self.colorPalette[self.color_idx]
+        else:
+            return hsvColorAdd(self.color, (self.hueDelta, 0, 0))
 
     def setWipeStateFromButtons(self, params):
         """ if we detect a new button-press and aren't already in the middle of a wipe,
@@ -22,7 +42,7 @@ class ColorWiper(EffectLayer):
                 self.buttonDown = True
                 self.wipeStartTime = time.time()
                 self.oldColor = self.color
-                self.color = hsvColorAdd(self.color, (self.hueDelta, 0, 0))
+                self.color = self.nextColor()
         else:
             self.buttonDown = False
 
