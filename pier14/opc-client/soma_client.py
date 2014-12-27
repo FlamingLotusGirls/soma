@@ -9,7 +9,6 @@ from effects.random_blink_cycle import *
 from effects.chase import AxonChaseLayer
 from effects.colorwave import ColorWave
 from effects.colorwiper import ColorWiper
-from effects.holidaycolorwiper import HolidayColorWiper
 from effects.invert import InvertColorsLayer, InvertColorByRegionLayer
 from effects.color_palette_battle import *
 from effects.photo_colors import *
@@ -51,29 +50,22 @@ def main(screen):
     playlist = Playlist([
 	   #[TestPatternLayer()],
 	   #[AddressTestLayer()],
-       [
-            HolidayColorWiper(
-                model,
-                colors=[(204, 31, 31), (36, 143, 0), (255, 255, 255)],
-                timer=3
-            )
+        [
+            PhotoColorsLayer(model),
+            DimBrightButtonLayer(),
+            SpeckLayer(button=0),
+            SpeckLayer(button=1)
         ],
-        # [
-        #     PhotoColorsLayer(model),
-        #     DimBrightButtonLayer(),
-        #     SpeckLayer(button=0),
-        #     SpeckLayer(button=1)
-        # ],
-        # [
-        #     MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
-        # ],
-        # [
-        #    RandomPhaseLayer(model),
-        #    ColorCycleLayer(0.00003, 0.0001)
-        # ],
-        # [
-        #     ColorPaletteBattleLayer(model)
-        # ],
+        [
+            MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
+        ],
+        [
+           RandomPhaseLayer(model),
+           ColorCycleLayer(0.00003, 0.0001)
+        ],
+        [
+            ColorPaletteBattleLayer(model)
+        ],
     ])
 
     # the renderer manages a playlist (or dict of multiple playlists), as well as transitions

@@ -67,12 +67,10 @@ def main(screen):
         # [
         #    ColorPaletteBattleLayer(model)
         # ],
-        [
-            HolidayColorWiper(
-                model,
-                colors=[(204, 31, 31), (36, 143, 0), (255, 255, 255)],
-                timer=3
-            )
+        [HolidayColorWiper(model,
+            colors=[(204,31,31), (36,143,0), (255,255,255)],
+            timer=3
+        )
         ],
         # [
            #PhotoColorsLayer(model),
