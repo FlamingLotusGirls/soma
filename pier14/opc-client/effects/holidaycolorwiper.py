@@ -6,6 +6,17 @@ from effectlayer import EffectLayer
 from colorsys import hsv_to_rgb, rgb_to_hsv
 
 class HolidayColorWiper(EffectLayer):
+    """
+    Wipes between some number of specific colors.
+    Without the optional parameters, this behaves identically to
+    the ColorWiper layer.
+
+    Optional Constructor parameters:
+    - colors: an array of three-element decimal color spefiers in the
+      range 0-255).
+    - timers: A timer parameter in seconds, which determines the time to wait
+      before automatically switching colors
+    """
     def __init__(self, model, colors=None, timer=None):
         self.model = model
         self.wipeDuration = 1
