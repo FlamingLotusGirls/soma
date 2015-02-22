@@ -18,6 +18,9 @@ class EffectParameters(object):
     buttonState = [False]*buttonCnt # true if button is pressed or false if it is not pressed
     buttonTimeSinceStateChange = [0]*buttonCnt #how long since the button last changed state
 
+    def __str__(self):
+        return "Time: %d, buttonState: %s buttonTimeSinceChange: %s " % (self.time, self.buttonState, self.buttonTimeSinceStateChange)
+
 
 class EffectLayer(object):
     """Abstract base class for one layer of an LED light effect. Layers operate on a shared framebuffer,
@@ -51,6 +54,8 @@ class EffectLayer(object):
             self.error_count += 1
             if self.error_count >= EffectLayer.maximum_errors:
                 print("Disabling", self, "for throwing too many errors")
+                
+        
 
 
 ########################################################
@@ -176,6 +181,50 @@ class TestPatternLayer(EffectLayer):
         cosine = numpy.cos(elapsedTime * 2 * pi);
 
         frame[:] = cosine * numpy.array([1,0,0])
+
+# step through LEDs in order of frame index in response to a button push
+class ControlledAddressTestLayer(EffectLayer):
+    def __init__(self):
+        self.index = 0   # relative index, between first and last
+        self.first = 0
+        self.last  = 200  # out of range, intentionally
+        self.color = numpy.array([1,0,0])
+        self.buttonState = False
+
+    def render(self, model, params, frame):
+        if not self.last or self.last >= model.numLEDs:
+            self.last = model.numLEDs-1
+
+        curButtonState = params.buttonState[1]
+        buttonPressed = False
+        if curButtonState == True and self.buttonState == False:
+           # Button pressed. Increment
+           self.index += 1
+           if self.index > self.last - self.first:
+               self.index %= self.last - self.first
+           self.buttonState = True
+           buttonPressed = True
+           print("button pressed")
+
+        elif curButtonState == False:
+           self.buttonState = False
+        
+        curIdx = self.first + self.index   # absolute index in the frame
+       
+        if buttonPressed:
+           if model.addresses != None and len(model.addresses) > curIdx:
+              address = model.addresses[curIdx]
+           else:
+              if model.addresses == None:
+                 pass
+                 #print "No addresses"
+              elif len(model.addresses) <= curIdx:
+                 print("Len too short")
+                 print("Len is %d" %(len(model.addresses)))
+              address = "Not set"
+           print("Button Pressed. LED index %s, name %s, address %s" %(curIdx, model.pointNames[curIdx], address))
+   
+        frame[curIdx] = self.color 
 
 
 

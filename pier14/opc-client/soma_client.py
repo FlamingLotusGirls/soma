@@ -42,14 +42,14 @@ def main(screen):
     else:
         ButtonMonitorThread(masterParams).start()
 
-    model = SomaModel()
+    model = SomaModel() #address_filename="../addresses.txt")
 
     # a playlist. each entry in a playlist can contain one or more effect layers
     # (if more than one, they are all rendered into the same frame...mixing method
     # is determined by individual effect layers' render implementations)
     playlist = Playlist([
-	   #[TestPatternLayer()],
-	   #[AddressTestLayer()],
+	   #[TriangleWaveLayer()],
+	   #[ControlledAddressTestLayer()],
         [
             PhotoColorsLayer(model),
             DimBrightButtonLayer(),

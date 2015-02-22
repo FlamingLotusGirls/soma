@@ -11,13 +11,24 @@ class Model(object):
 
 class SomaModel(Model):
 
-    def __init__(self, points_filename='points.json'):
+    def __init__(self, points_filename='points.json', address_filename=None):
         self.json = json.load(open(points_filename))
+
+
+        # if there is an addresses file, read it
+        if address_filename:
+           self.addresses = self._addressesRead(address_filename)
+           print("have %d addresses" %(len(self.addresses)))
+        else:
+           self.addresses = None
         
         # pull raw positions from JSON
         self.rawPoints = self._nodesFromJSON()
 
         Model.__init__(self, len(self.rawPoints))
+
+        # get names of points
+        self.pointNames = self._namesFromJSON()
 
         #sort points into regions
         self.regionIndicies = {}
@@ -43,6 +54,12 @@ class SomaModel(Model):
 
         # self._testPrint()
 
+    def _namesFromJSON(self):
+        names = [];
+        for val in self.json:
+            names.append(val['name'])
+        return names
+
     def _nodesFromJSON(self):
         points = []
         for val in self.json:
@@ -57,6 +74,15 @@ class SomaModel(Model):
 
     def _getUpperIndices(self):
         return self.regionIndicies['Upper']
+
+    def _addressesRead(self, addressFilename):
+        tmpAddresses = []
+        with open(addressFilename, 'r') as file:
+           for line in file:
+              if line[0] !='#' and not line.isspace():
+                 tmpAddresses.append(line)
+        print "Found %d addresses" %(len(tmpAddresses))
+        return tmpAddresses
 
     def _testPrint(self):
         print self.upperIndices
