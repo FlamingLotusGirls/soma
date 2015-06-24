@@ -9,16 +9,16 @@ from effects.random_blink_cycle import *
 from effects.chase import AxonChaseLayer
 from effects.colorwave import ColorWave
 from effects.colorwiper import ColorWiper
+from effects.axon import AxonLayer
+from effects.lower import LowerLayer
+from effects.upper import UpperLayer
 from effects.invert import InvertColorsLayer, InvertColorByRegionLayer
 from effects.color_palette_battle import *
 from effects.photo_colors import *
 from effects.clamp import *
 from effects.dim_bright_button_layer import *
 from effects.button_flash import ButtonFlash
-from effects.specklayer import SpeckLayer
-from effects.lower import LowerLayer
-from effects.upper import UpperLayer
-from effects.axon import AxonLayer
+from effects.mono import MonoLayer
 from effects.morse2 import MorseLayer2
 from playlist import Playlist
 from threads import PlaylistAdvanceThread, KeyboardMonitorThread, ButtonMonitorThread
@@ -42,42 +42,45 @@ def main(screen):
         # put keyboard state into effect parameters
         keymonitor = KeyboardMonitorThread(masterParams, screen)
         keymonitor.start()
+        print "screen"
 
     else:
         ButtonMonitorThread(masterParams).start()
+        print "no screen"
 
-    model = SomaModel() #address_filename="../addresses.txt")
+    model = SomaModel()
 
     # a playlist. each entry in a playlist can contain one or more effect layers
     # (if more than one, they are all rendered into the same frame...mixing method
     # is determined by individual effect layers' render implementations)
     playlist = Playlist([
-	   #[TriangleWaveLayer()],
+	   #[TestPatternLayer()],
 	   #[ControlledAddressTestLayer()],
-        [           
-           MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
-           ColorCycleLayer(0.0003, 0.0005)
-        ],
-        [
-            PhotoColorsLayer(model),
-            DimBrightButtonLayer(),
-            SpeckLayer(button=0),
-            SpeckLayer(button=1)
-        ],
-        [
-            MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
-        ],
-        [
-           RandomPhaseLayer(model),
-           ColorCycleLayer(0.00003, 0.0001)
-        ],
-        [
-            ColorPaletteBattleLayer(model)
-        ],
-       # [           
-       #    MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
-       #    ColorCycleLayer(0.0003, 0.0005)
-       # ],
+	   [MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"])]
+	   
+#        [
+#            PhotoColorsLayer(model),
+#            DimBrightButtonLayer(),
+#            MorseLayer("SOMA", "SOS"),
+#            MonoLayer(0.05)
+#        ],
+#         [
+#            AxonLayer(model)
+#            MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
+#            MonoLayer(0.05)
+#        ],
+#        [
+#            LowerLayer(model)
+
+#           RandomPhaseLayer(model),
+#           ColorCycleLayer(0.00003, 0.0001),
+#           MonoLayer(0.05)
+#        ],
+#        [
+#            UpperLayer(model)
+        
+            # ColorPaletteBattleLayer(model)
+#        ],
     ])
 
     # the renderer manages a playlist (or dict of multiple playlists), as well as transitions
@@ -91,7 +94,7 @@ def main(screen):
 
     # a thread that periodically advances the active playlist within the renderer.
     # TODO: example to demonstrate swapping between multiple playlists with custom fades
-    advancer = PlaylistAdvanceThread(renderer, switchInterval=10*60)
+    advancer = PlaylistAdvanceThread(renderer, switchInterval=100)
     advancer.start()
 
     # go!
@@ -99,11 +102,12 @@ def main(screen):
 
 
 if __name__ == '__main__':
-    #try:
-    #    # try to import curses for keyboard button emulator
-    #    import curses.wrapper
-    #    curses.wrapper(main)
-    #except ImportError:
-    #    # otherwise just run main with no curses screen
-    #    main(None)
-    main(None)
+    try:
+        # try to import curses for keyboard button emulator
+        import curses.wrapper
+        curses.wrapper(main)
+    except ImportError:
+        # otherwise just run main with no curses screen
+        print "error no curses wrapper"
+        main(None)
+    #main(None)

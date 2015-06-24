@@ -10,17 +10,6 @@ class Model(object):
 
 
 class SomaModel(Model):
-    """
-    The model has the following members, taken from the 'points.json' file (or whatever file
-    you decide to load):
-    - rawPoints. Array of raw positions, unscaled.
-    - nodes. Array of scaled positions - coordinates have been scaled to [0,1]
-    - pointNames. Array of names of LEDs - A12, U15C, etc
-    - axonIndices. Array of indices for axons LEDs
-    - lowerIndices. Array of indices for the lower dendrite
-    - upperIndices. Array of indices for the upper dendrite
-    - addresses. Array of indices of R485 protocol addresses, if address_filename is specified (really handy for debugging on the actual sculpture)
-    """
 
     def __init__(self, points_filename='points.json', address_filename=None):
         self.json = json.load(open(points_filename))

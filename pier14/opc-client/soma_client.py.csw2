@@ -54,30 +54,26 @@ def main(screen):
     playlist = Playlist([
 	   #[TriangleWaveLayer()],
 	   #[ControlledAddressTestLayer()],
+       # [
+       #     PhotoColorsLayer(model),
+       #     DimBrightButtonLayer(),
+       #     SpeckLayer(button=0),
+       #     SpeckLayer(button=1)
+       # ],
+       # [
+       #     MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
+       # ],
+       # [
+       #    RandomPhaseLayer(model),
+       #    ColorCycleLayer(0.00003, 0.0001)
+       # ],
+       # [
+       #     ColorPaletteBattleLayer(model)
+       # ],
         [           
-           MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
-           ColorCycleLayer(0.0003, 0.0005)
-        ],
-        [
-            PhotoColorsLayer(model),
-            DimBrightButtonLayer(),
-            SpeckLayer(button=0),
-            SpeckLayer(button=1)
-        ],
-        [
-            MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
-        ],
-        [
-           RandomPhaseLayer(model),
+          [MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"])]
            ColorCycleLayer(0.00003, 0.0001)
         ],
-        [
-            ColorPaletteBattleLayer(model)
-        ],
-       # [           
-       #    MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
-       #    ColorCycleLayer(0.0003, 0.0005)
-       # ],
     ])
 
     # the renderer manages a playlist (or dict of multiple playlists), as well as transitions
