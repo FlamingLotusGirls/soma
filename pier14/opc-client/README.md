@@ -11,7 +11,8 @@ Instructions to run example in lighting simulator:
   * make
 * Launch visualizer:
   * cd [path-to-soma-repo]/pier14/opc-client
-  * [path-to-openpixelcontrol-repo]/openpixelcontrol/bin/gl_server points.json 7890 model.stl &
+  * [path-to-openpixelcontrol-repo]/bin/gl_server points.json 7890 model.stl &
+  * Click-and-Drag will spin the model around. Shift-Click-and-Drag will zoom in and out.  Arrow keys and PageUp, PageDown will pan along X, Y, and Z.
 * Run the test script: python soma_test.py
 
 Dependencies:
