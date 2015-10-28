@@ -53,12 +53,16 @@ def main(screen, interval):
     # is determined by individual effect layers' render implementations)
     playlist = Playlist([
 
-	   #[ControlledAddressTestLayer()],
+        # This is a very handy layer for debugging.  Steps through LEDs in
+        # order of frame index in response to a button push, printing the
+        # address of the lit LED.
+        #[ControlledAddressTestLayer()],
 
-	   #[TriangleWaveLayer()],
+        #[TriangleWaveLayer()],
+
         [           
-           MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
-           ColorCycleLayer(0.0003, 0.0005)
+            MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
+            ColorCycleLayer(0.0003, 0.0005)
         ],
         [
             PhotoColorsLayer(model),
@@ -80,11 +84,6 @@ def main(screen, interval):
         #[
         #    ColorPaletteBattleLayer(model)
         #],
-
-       # [           
-       #    MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
-       #    ColorCycleLayer(0.0003, 0.0005)
-       # ],
     ])
 
     # the renderer manages a playlist (or dict of multiple playlists), as well as transitions
