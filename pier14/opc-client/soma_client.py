@@ -27,7 +27,7 @@ from math import *
 import os
 import sys
 
-def main(screen):
+def main(screen, interval):
 
     # master parameters, used in rendering and updated by playlist advancer thread
     masterParams = EffectParameters()
@@ -52,8 +52,10 @@ def main(screen):
     # (if more than one, they are all rendered into the same frame...mixing method
     # is determined by individual effect layers' render implementations)
     playlist = Playlist([
-	   #[TriangleWaveLayer()],
+
 	   #[ControlledAddressTestLayer()],
+
+	   #[TriangleWaveLayer()],
         [           
            MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
            ColorCycleLayer(0.0003, 0.0005)
@@ -71,9 +73,14 @@ def main(screen):
            RandomPhaseLayer(model),
            ColorCycleLayer(0.00003, 0.0001)
         ],
-        [
-            ColorPaletteBattleLayer(model)
-        ],
+
+        # This one doesn't do anything when buttons aren't being pressed, so
+        # people think that the sculpture is broken and displaying a frozen
+        # pattern :(
+        #[
+        #    ColorPaletteBattleLayer(model)
+        #],
+
        # [           
        #    MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
        #    ColorCycleLayer(0.0003, 0.0005)
@@ -91,12 +98,12 @@ def main(screen):
 
     # a thread that periodically advances the active playlist within the renderer.
     # TODO: example to demonstrate swapping between multiple playlists with custom fades
-    advancer = PlaylistAdvanceThread(renderer, switchInterval=10*60)
+
+    advancer = PlaylistAdvanceThread(renderer, switchInterval=interval)
     advancer.start()
 
     # go!
     controller.drawingLoop()
-
 
 if __name__ == '__main__':
     #try:
@@ -106,4 +113,17 @@ if __name__ == '__main__':
     #except ImportError:
     #    # otherwise just run main with no curses screen
     #    main(None)
-    main(None)
+
+    # Unbuffer stdout (simulating python's "-u" flag)
+    sys.stdout = os.fdopen(sys.stdout.fileno(), 'w', 0)
+
+    # Redirect stderror to stdout
+    old = sys.stderr
+    sys.stderr = sys.stdout
+    old.close()
+
+    print "Starup, PID", os.getpid()
+
+    #interval = 10*60
+    interval = 60*3
+    main(None, interval)

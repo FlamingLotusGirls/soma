@@ -30,4 +30,4 @@ class Playlist:
                     random.shuffle(self.order)
                 selected = 0
             self.selected = selected
-            print "playlist advanced"
+            print "playlist advanced to %d; shuffle is %s" % (selected, str(self.shuffle))

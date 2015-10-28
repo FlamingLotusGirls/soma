@@ -19,7 +19,7 @@ class PlaylistAdvanceThread(Thread):
             if time.time() - lastActive > self.switchInterval:
                 self.renderer.advanceCurrentPlaylist()
                 lastActive = time.time()
-            time.sleep(0.05)
+            time.sleep(1)
 
 
 class KeyboardMonitorThread(Thread):
