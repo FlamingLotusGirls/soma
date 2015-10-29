@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import random
+import time
 
 from effectlayer import EffectLayer
 
@@ -26,71 +27,75 @@ class Lightning(EffectLayer):
 
     # The formatting of the 'sequence' array below is pretty wonky, but it lets
     # us rapidly prototype patterns using ASCII.  The first element is the RGB
-    # color for the lower dodeca, the second is an 27-byte long ASCII string
-    # where each character represents one LED in the axon, and the last is the
-    # RGB color for the upper dodeca.
+    # scalar for the lower dodeca, the second is an 27-byte long ASCII string
+    # where each character represents one LED in the axon, the third is the RGB
+    # scalar for the upper dodeca, and the last is a boolean indicating if this
+    # frame should be frozen until the button is released.
 
     sequence = (
         # Starting on lower dodeca
         # Lightning flash across axon
 
-        [ 0.0,   '     ______________________',   0.0 ],
-        [ 0.0,   '     ______________________',   0.0 ],
-        [ 0.0,   '     ______________________',   0.0 ],
-        [ 0.0,   '     ______________________',   0.0 ],
+        [ 0.0,   '     ______________________',   0.0, False ],
+        [ 0.0,   '     ______________________',   0.0, False ],
+        [ 0.0,   '     ______________________',   0.0, False ],
+        [ 0.0,   '     ______________________',   0.0, False ],
 
-        [ 1.0,   '     ______________________',   0.0 ],
-        [ 1.0,   '     ______________________',   0.0 ],
-        [ 1.0,   '     ______________________',   0.0 ],
+        [ 1.0,   '     ______________________',   0.0, False ],
+        [ 1.0,   '     ______________________',   0.0, False ],
+        [ 1.0,   '     ______________________',   0.0, False ],
 
-        [ 1.0,   '@    ______________________',   0.0 ],
-        [ 1.0,   '@@   ______________________',   0.0 ],
-        [ 1.0,   '@@@@ ______________________',   0.0 ],
-        [ 1.0,   '225@@@@@@__________________',   0.0 ],
-        [ 1.0,   '____225@@@@@@______________',   0.0 ],
-        [ 9.0,   '________225@@@@@@__________',   0.0 ],
-        [ 8.0,   '____________225@@@@@@______',   0.0 ],
-        [ 7.0,   '________________225@@@@@@__',   0.0 ],
-        [ 6.0,   '___________________225@@@@@',   0.0 ],
+        [ 1.0,   '@    ______________________',   0.0, False ],
+        [ 1.0,   '@@   ______________________',   0.0, False ],
+        [ 1.0,   '@@@@ ______________________',   0.0, False ],
+        [ 1.0,   '225@@@@@@__________________',   0.0, False ],
+        [ 1.0,   '____225@@@@@@______________',   0.0, False ],
+        [ 9.0,   '________225@@@@@@__________',   0.0, False ],
+        [ 8.0,   '____________225@@@@@@______',   0.0, False ],
+        [ 7.0,   '________________225@@@@@@__',   0.0, False ],
+        [ 6.0,   '___________________225@@@@@',   0.0, False ],
 
         # Hitting upper dodeca
-        [ 0.0,   '_____________________225@@@',   1.0 ],
-        [ 0.0,   '______________________225@@',   1.0 ],
-        [ 0.0,   '_______________________225@',   1.0 ],
-        [ 0.0,   '________________________225',   1.0 ],
-        [ 0.0,   '_________________________22',   1.0 ],
-        [ 0.0,   '__________________________1',   1.0 ],
-        [ 0.0,   '___________________________',   1.0 ],
-        [ 0.0,   '___________________________',   1.0 ],
-        [ 0.0,   '___________________________',   0.9 ],
-        [ 0.0,   '___________________________',   0.8 ],
-        [ 0.0,   '___________________________',   0.7 ],
-        [ 0.0,   '___________________________',   0.6 ],
+        [ 0.0,   '_____________________225@@@',   1.0, False ],
+        [ 0.0,   '______________________225@@',   1.0, False ],
+        [ 0.0,   '_______________________225@',   1.0, False ],
+        [ 0.0,   '________________________225',   1.0, False ],
+        [ 0.0,   '_________________________22',   1.0, False ],
+        [ 0.0,   '__________________________1',   1.0, False ],
+
+        [ 0.0,   '___________________________',   1.0, True ],
+        [ 0.0,   '___________________________',   1.0, False ],
+        [ 0.0,   '___________________________',   0.9, False ],
+        [ 0.0,   '___________________________',   0.8, False ],
+        [ 0.0,   '___________________________',   0.7, False ],
+        [ 0.0,   '___________________________',   0.6, False ],
 
         # Blanking afterwards
-        [ 0.0,   '___________________________',   0.0 ],
-        [ 0.0,   '___________________________',   0.0 ],
-        [ 0.0,   '___________________________',   0.0 ],
-        [ 0.0,   '___________________________',   0.0 ],
-        [ 0.0,   '___________________________',   0.0 ],
-        [ 0.0,   '___________________________',   0.0 ],
-        [ 0.0,   '___________________________',   0.0 ],
-        [ 0.0,   '___________________________',   0.0 ],
-        [ 0.0,   '___________________________',   0.0 ],
+        [ 0.0,   '___________________________',   0.0, False ],
+        [ 0.0,   '___________________________',   0.0, False ],
+        [ 0.0,   '___________________________',   0.0, False ],
+        [ 0.0,   '___________________________',   0.0, False ],
+        [ 0.0,   '___________________________',   0.0, False ],
+        [ 0.0,   '___________________________',   0.0, False ],
+        [ 0.0,   '___________________________',   0.0, False ],
+        [ 0.0,   '___________________________',   0.0, False ],
+        [ 0.0,   '___________________________',   0.0, False ],
     )
 
+    # First element is the color of the lower dodeca, second is the upper
     dodeca_colors = [
-            ([ 255,   0, 255 ], [ 255, 255,   0 ]),
-            ([   0, 255,   0 ], [ 255,   0, 255 ]),
-            ([   0,   0, 255 ], [ 255, 255,   0 ]),
-            ([ 255,   0,   0 ], [   0, 255,   0 ]),
-            ([   0, 255,   0 ], [ 255,   0,   0 ]),
+            (( 255,   0, 255 ), ( 255, 255,   0 )),
+            ((   0, 255,   0 ), ( 255,   0, 255 )),
+            ((   0,   0, 255 ), ( 255, 255,   0 )),
+            (( 255,   0,   0 ), (   0, 255,   0 )),
+            ((   0, 255,   0 ), ( 255,   0,   0 )),
         ]
 
     def __init__(self):
-        self.index = 0
         self.armed = False
         self.firing = False
+        self.index = 0
+        self.pause_time = 0
 
     def render(self, model, params, frame):
         button = True in params.buttonState
@@ -104,6 +109,7 @@ class Lightning(EffectLayer):
             self.firing = True
             self.armed = False
             self.index = 0
+            self.pause_time = 0
 
             self.dodeca_colors.insert(0, self.dodeca_colors.pop())
 
@@ -115,7 +121,7 @@ class Lightning(EffectLayer):
         if not self.firing:
             return
 
-        lower_color, axon_string, upper_color = self.sequence[self.index]
+        lower_color, axon_string, upper_color, pause = self.sequence[self.index]
 
         for i in range(self.num_lower):
             frame[self.lower_offset + i] = (self.r1 * lower_color, self.g1 * lower_color, self.b1 * lower_color)
@@ -148,6 +154,19 @@ class Lightning(EffectLayer):
         for i in range(len(frame)):
             for j in range(len(frame[i])):
                 frame[i][j] /= 255.0
+
+        # If they haven't released the button yet, freeze specific frames, but
+        # only for up to N seconds.
+        if pause and not self.armed:
+
+            if not self.pause_time:
+                print "Lightning: Paused"
+                self.pause_time = time.time()
+
+            if time.time() - self.pause_time <= 3:
+                return
+            else:
+                print "Lightning: Pause max"
 
         self.index += 1
         if self.index >= len(self.sequence):
