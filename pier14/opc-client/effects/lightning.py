@@ -65,13 +65,11 @@ class Lightning(EffectLayer):
         [ 0.0,   '___________________________',   0.0 ],
     )
 
-    dodeca_colors = (
-            #([   0,   0,   0 ], [   0,   0,   0 ]),
-
+    dodeca_colors = [
             ([ 255,   0,   0 ], [   0, 255,   0 ]),
             ([   0, 255,   0 ], [ 255,   0, 255 ]),
             ([   0,   0, 255 ], [ 255, 255,   0 ]),
-        )
+        ]
 
     def __init__(self):
         self.index = 0
@@ -91,11 +89,12 @@ class Lightning(EffectLayer):
             self.armed = False
             self.index = 0
 
-            choice = random.choice(self.dodeca_colors)
+            print repr(self.dodeca_colors)
+            self.dodeca_colors.insert(0, self.dodeca_colors.pop())
+            print repr(self.dodeca_colors)
 
-            self.r1, self.g1, self.b1 = choice[0]
-            self.r2, self.g2, self.b2 = choice[1]
-            print repr(choice)
+            self.r1, self.g1, self.b1 = self.dodeca_colors[0][0]
+            self.r2, self.g2, self.b2 = self.dodeca_colors[0][1]
 
         if not self.firing:
             return
