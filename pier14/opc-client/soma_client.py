@@ -61,11 +61,6 @@ def main(screen, interval):
 
         #[TriangleWaveLayer()],
 
-        [           
-            MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
-            ColorCycleLayer(0.0003, 0.0005),
-            Lightning(),
-        ],
         [
             PhotoColorsLayer(model),
             DimBrightButtonLayer(),
@@ -89,6 +84,11 @@ def main(screen, interval):
         #[
         #    ColorPaletteBattleLayer(model)
         #],
+        [
+            MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
+            ColorCycleLayer(0.0003, 0.0005),
+            Lightning(),
+        ],
     ])
 
     # the renderer manages a playlist (or dict of multiple playlists), as well as transitions
