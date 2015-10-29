@@ -20,6 +20,7 @@ from effects.lower import LowerLayer
 from effects.upper import UpperLayer
 from effects.axon import AxonLayer
 from effects.morse2 import MorseLayer2
+from effects.lightning import Lightning
 from playlist import Playlist
 from threads import PlaylistAdvanceThread, KeyboardMonitorThread, ButtonMonitorThread
 from random import random
@@ -53,25 +54,28 @@ def main(screen, interval):
     # is determined by individual effect layers' render implementations)
     playlist = Playlist([
 
-	   #[ControlledAddressTestLayer()],
+        # This is a very handy layer for debugging.  Steps through LEDs in
+        # order of frame index in response to a button push, printing the
+        # address of the lit LED.
+        #[ControlledAddressTestLayer()],
 
-	   #[TriangleWaveLayer()],
-        [           
-           MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
-           ColorCycleLayer(0.0003, 0.0005)
-        ],
+        #[TriangleWaveLayer()],
+
         [
             PhotoColorsLayer(model),
             DimBrightButtonLayer(),
             SpeckLayer(button=0),
-            SpeckLayer(button=1)
+            SpeckLayer(button=1),
+            Lightning(),
         ],
         [
             MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
+            Lightning(),
         ],
         [
            RandomPhaseLayer(model),
-           ColorCycleLayer(0.00003, 0.0001)
+           ColorCycleLayer(0.00003, 0.0001),
+            Lightning(),
         ],
 
         # This one doesn't do anything when buttons aren't being pressed, so
@@ -80,11 +84,11 @@ def main(screen, interval):
         #[
         #    ColorPaletteBattleLayer(model)
         #],
-
-       # [           
-       #    MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
-       #    ColorCycleLayer(0.0003, 0.0005)
-       # ],
+        [
+            MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
+            ColorCycleLayer(0.0003, 0.0005),
+            Lightning(),
+        ],
     ])
 
     # the renderer manages a playlist (or dict of multiple playlists), as well as transitions

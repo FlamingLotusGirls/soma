@@ -14,7 +14,13 @@ class Playlist:
         self.shuffle = shuffle
         if shuffle:
             random.shuffle(self.order)
-            
+        self.print_selection()
+
+    def print_selection(self):
+        print "Playlist selecting index %d:" % self.selected
+        for x in self.routines[self.order[self.selected]]:
+            print "    ", repr(x)
+
     def selection(self):
         return self.routines[self.order[self.selected]]
             
@@ -30,4 +36,4 @@ class Playlist:
                     random.shuffle(self.order)
                 selected = 0
             self.selected = selected
-            print "playlist advanced to %d; shuffle is %s" % (selected, str(self.shuffle))
+            self.print_selection()
