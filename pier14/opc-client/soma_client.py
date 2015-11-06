@@ -21,6 +21,7 @@ from effects.upper import UpperLayer
 from effects.axon import AxonLayer
 from effects.morse2 import MorseLayer2
 from effects.lightning import Lightning
+from effects.repair import Repair
 from playlist import Playlist
 from threads import PlaylistAdvanceThread, KeyboardMonitorThread, ButtonMonitorThread
 from random import random
@@ -67,15 +68,20 @@ def main(screen, interval):
             SpeckLayer(button=0),
             SpeckLayer(button=1),
             Lightning(),
+            Repair(),
         ],
+
         [
             MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
             Lightning(),
+            Repair(),
         ],
+
         [
-           RandomPhaseLayer(model),
-           ColorCycleLayer(0.00003, 0.0001),
+            RandomPhaseLayer(model),
+            ColorCycleLayer(0.00003, 0.0001),
             Lightning(),
+            Repair(),
         ],
 
         # This one doesn't do anything when buttons aren't being pressed, so
@@ -83,11 +89,15 @@ def main(screen, interval):
         # pattern :(
         #[
         #    ColorPaletteBattleLayer(model)
+        #    Lightning(),
+        #    Repair(),
         #],
+
         [
             MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
             ColorCycleLayer(0.0003, 0.0005),
             Lightning(),
+            Repair(),
         ],
     ])
 
