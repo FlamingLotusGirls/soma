@@ -147,9 +147,6 @@ class Lightning(EffectLayer):
             elif value in ('B',    ): frame[self.axon_offset + i] = (  0,   0, 255)
             else:                     frame[self.axon_offset + i] = (  0,   0,   0)
 
-        # The red channel is out on this LED, don't use it.
-        frame[18] = (0,0,0)
-
         # Scale from [0..255] to [0..1]
         for i in range(len(frame)):
             for j in range(len(frame[i])):
@@ -158,7 +155,6 @@ class Lightning(EffectLayer):
         # If they haven't released the button yet, freeze specific frames, but
         # only for up to N seconds.
         if pause and not self.armed:
-
             if not self.pause_time:
                 print "Lightning: Paused"
                 self.pause_time = time.time()
