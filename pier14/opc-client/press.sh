@@ -1,31 +1,60 @@
 #!/bin/bash
+# vim:set ts=4 sw=4 ai et:
 
 # Manually simulate button presses on the sculpture.
 
-if ! test -d /var/run/soma
-then
-	echo "Directory /var/run/soma does not exist"
-	exit 1
-fi
+usage() { echo "Usage: $0 [-w]" 1>&2; exit 1; }
+
+while getopts "w" o; do
+    case "${o}" in
+        w)
+            WAIT="yes"
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
+#if ! test -d /var/run/soma
+#then
+#    echo "Directory /var/run/soma does not exist"
+#    exit 1
+#fi
 
 echo "Ready"
 
+BUTTON=/tmp/buttonA
+
 while true
 do
-	read -s i
-	if test "$i" = "r"
-	then
-		echo "Restarting"
-		sudo systemctl restart opc-client.service
-		continue
-	fi
+    read -s -n 1 i
 
-	echo -n "$(date +%H:%M:%S)  Pressed "
-	touch /var/run/soma/buttonA
+    if test "$i" = "1" || test "$i" = "l" || test "$i" = "a"
+    then
+        BUTTON=/tmp/buttonA
+    elif test "$i" = "0" || test "$i" = "r" || test "$i" = "b"
+    then
+        BUTTON=/tmp/buttonB
+    elif test "$i" = "r"
+    then
+        echo "Restarting"
+        sudo systemctl restart opc-client.service
+        continue
+    fi
 
-	read -s i
-	#sleep 0.5
+    echo -n "$(date +%H:%M:%S)  Pressed $BUTTON  "
+    touch $BUTTON
 
-	echo "Released"
-	rm -f /var/run/soma/buttonA
+    if test "$WAIT" = "yes"
+    then
+        read -s -n 1 i
+    else
+        sleep 0.5
+    fi
+
+    echo "Released"
+    rm -f $BUTTON
 done
