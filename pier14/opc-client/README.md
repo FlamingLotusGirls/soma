@@ -1,20 +1,42 @@
-A simple Python framework for rendering LED effects and sending them out via Open Pixel Control.
+Soma's OPC Client
+=================
 
-Pulled out of the Mens Amplio repo (https://github.com/mens-amplio/mens-amplio) for extension/re-use in future projects.
+A simple Python framework for rendering LED patterns and sending them to
+an Open Pixel Control server.  Pulled out of [Mens Amplio][mensamplio] for
+extension and re-use in future projects.
 
-Instructions to run example in lighting simulator:
-* Clone this repo
-* Clone the Open Pixel Control repo (https://github.com/FlamingLotusGirls/openpixelcontrol) - be sure to clone the FLG fork and not the original!
-* Install dependencies
-* Build OPC - this only has to happen once:
-  * cd [path-to-openpixelcontrol-repo]
-  * make
-* Launch visualizer:
-  * cd [path-to-soma-repo]/pier14/opc-client
-  * [path-to-openpixelcontrol-repo]/bin/gl_server points.json 7890 model.stl &
-  * Click-and-Drag will spin the model around. Shift-Click-and-Drag will zoom in and out.  Arrow keys and PageUp, PageDown will pan along X, Y, and Z.
-* Run the test script: python soma_test.py
+[mensamplio]: https://github.com/mens-amplio/mens-amplio
+[opc]:        https://github.com/FlamingLotusGirls/openpixelcontrol
 
-Dependencies:
-* numpy
-* mesa-common-dev and freeglut3-dev (for OPC gl_server on Linux; not needed on Pi or Mac)
+Simulator
+=========
+
+To develop patterns for Soma, you can first run them in an OpenGL simulator on
+a Linux or OSX desktop:
+
+* Clone this repository
+
+* In the same top-level directory, clone FLG's [fork of Open Pixel Control][opc].
+  Be sure to use the FLG fork, and not the original.
+
+* Install dependencies:
+
+    * numpy
+
+    * Linux also requires: mesa-common-dev, freeglut3-dev
+
+* cd soma/pier14/opc-client
+
+* In one window, launch the visualizer:
+
+    * ./run-simulator.sh
+
+* In another window, launch the client:
+
+    * ./soma_client.py
+
+In the visualizer, **click-and-drag** will spin the model around.
+**Shift+click-and-drag** zooms in and out.  The **arrow keys** pan the
+sculpture along the X and Y axis, and **PageUp** and **PageDown** moves
+it along the Z axis.  To simulate button presses, press **1** for the
+left-hand button, and **0** for the right-hand one.
