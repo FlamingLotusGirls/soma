@@ -16,13 +16,14 @@ class DimBrightButtonLayer(EffectLayer):
     def __init__(self):
         self.clamp_factor = 0.5
         self.brightness = 1
-        self.min_brightness = 0.5
-        self.increment = 0.03
+        self.min_brightness = 0.3
+        self.increment = 0.01
+        self.decrement = 0.05
 
     def render(self, model, params, frame):
         
         if params.buttonState[0] or params.buttonState[1]: 
-            self.brightness -= self.increment
+            self.brightness -= self.decrement
             if self.brightness < self.min_brightness:
                 self.brightness = self.min_brightness
         else:
