@@ -10,7 +10,7 @@ class ColorPaletteBattleLayer(EffectLayer):
     def __init__(self, model):
         self.paletteLibrary = ColorPaletteLibrary()
         self.initPalette(model)
-        self.characteristicTime = 1/20. # average rate of color change for a single LED
+        self.characteristicTime = 1/5. # average rate of color change for a single LED
         self.waitTimes = numpy.array([random.expovariate(self.characteristicTime) for i in range(model.numLEDs)])
         self.lastFrameTime = None
         self.colorChangesInProgress = {}
@@ -51,6 +51,11 @@ class ColorPaletteBattleLayer(EffectLayer):
         for i in range(len(params.buttonState)):
             if(params.buttonState[i] and not self.buttonDown[i]):
                 self.buttonDown[i] = True
+                self.initiateColorChange(self.buttonColors[i], params.time, model)
+                self.initiateColorChange(self.buttonColors[i], params.time, model)
+                self.initiateColorChange(self.buttonColors[i], params.time, model)
+                self.initiateColorChange(self.buttonColors[i], params.time, model)
+                self.initiateColorChange(self.buttonColors[i], params.time, model)
                 self.initiateColorChange(self.buttonColors[i], params.time, model)
             if not params.buttonState[i]:
                 self.buttonDown[i] = False

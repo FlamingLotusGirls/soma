@@ -84,14 +84,10 @@ def main(screen, interval):
             Repair(),
         ],
 
-        # This one doesn't do anything when buttons aren't being pressed, so
-        # people think that the sculpture is broken and displaying a frozen
-        # pattern :(
-        #[
-        #    ColorPaletteBattleLayer(model)
-        #    Lightning(),
-        #    Repair(),
-        #],
+        [
+           ColorPaletteBattleLayer(model),
+           Repair(),
+        ],
 
         [
             MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
