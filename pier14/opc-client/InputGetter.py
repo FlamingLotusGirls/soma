@@ -48,7 +48,8 @@ class KeyboardInputGetter(InputGetter):
 # is not pressed. It is assumed that there's another
 # daemon process that runs in parallel to control the nodes
 class ButtonInputGetter(InputGetter):
-    BUTTON_DEV_PATH = '/var/run/soma/button'
+    #BUTTON_DEV_PATH = '/var/run/soma/button'
+    BUTTON_DEV_PATH = '/tmp/button'
     button_id = ["A", "B"]
 
     class Button:
