@@ -67,13 +67,11 @@ def main(screen, interval):
             DimBrightButtonLayer(),
             SpeckLayer(button=0),
             SpeckLayer(button=1),
-            Lightning(),
             Repair(),
         ],
 
         [
             MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
-            Lightning(),
             Repair(),
         ],
 
