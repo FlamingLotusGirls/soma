@@ -67,11 +67,13 @@ def main(screen, interval):
             DimBrightButtonLayer(),
             SpeckLayer(button=0),
             SpeckLayer(button=1),
+            Lightning(),
             Repair(),
         ],
 
         [
             MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
+            Lightning(),
             Repair(),
         ],
 
@@ -82,10 +84,10 @@ def main(screen, interval):
             Repair(),
         ],
 
-        [
-           ColorPaletteBattleLayer(model),
-           Repair(),
-        ],
+        #[
+        #   ColorPaletteBattleLayer(model),
+        #   Repair(),
+        #],
 
         [
             MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
