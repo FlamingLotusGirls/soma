@@ -4,8 +4,8 @@ import time
 
 
 class Speck(EffectLayer):
-	def __init__(self, color):
-		self.index = 0
+	def __init__(self, color, index=0):
+		self.index = index
 		self.color = numpy.array(color)
 		self.lifespan = 3.5
 		self.lastSwitch = time.time()

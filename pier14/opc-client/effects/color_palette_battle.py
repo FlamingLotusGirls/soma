@@ -3,6 +3,7 @@ import random
 import numpy
 from effectlayer import *
 from effects.color_palette_library import *
+from effects.specklayer import Speck
 import random
 
 class ColorPaletteBattleLayer(EffectLayer):
@@ -17,6 +18,12 @@ class ColorPaletteBattleLayer(EffectLayer):
         self.buttonDown = [False]*2
         self.axonChaseStartTime = None
         self.axonChaseDuration = 4
+        self.specks = []
+        self.speckColor =[1,1,1]
+        self.doSpecks = False
+        self.speckFrameDelay = 10
+        self.speckFrameIdx = 0
+        self.enableSpecks = False
 
         # Extract axon point positions in one dimension (they are normalized already)
         self.normalized_x_coords = model.nodes[:,1][range(model.numLEDs)]
@@ -36,6 +43,8 @@ class ColorPaletteBattleLayer(EffectLayer):
             self.renderRestingState(model, params)
 
         frame[:] = self.colors
+        if self.doSpecks:
+            self.renderSpecks(model, params, frame)
         return frame
 
     def renderRestingState(self, model, params):
@@ -97,6 +106,10 @@ class ColorPaletteBattleLayer(EffectLayer):
             self.axonChaseStartTime = time
             self.winningColor = color
             print 'YOU WIN'
+            if self.enableSpecks:
+                self.doSpecks = True
+                self.endSpeckTime = time + 5
+                self.speckSpawnEndTime = time + 2
 
     def renderAxonChase(self, model, params):
         chaseFraction = (params.time-self.axonChaseStartTime)/self.axonChaseDuration
@@ -108,6 +121,29 @@ class ColorPaletteBattleLayer(EffectLayer):
             if self.normalized_x_coords[i] > (1-chaseFraction):
                 self.colors[i] = self.winningColor
 
+    def renderSpecks(self, model, params, frame):
+        # advance state machine if we're done with our specks
+        if params.time > self.endSpeckTime:
+	    self.doSpecks = False
+            self.specks = []
+            return
+        # spawn more specks if we're within the speck span
+        if params.time > self.speckSpawnEndTime:
+            if self.speckFrameIdx == 0:
+                self.specks.append(Speck(self.speckColor, random.randrange(40)))
+            self.speckFrameIdx += 1
+            if self.speckFrameIdx >= self.speckFrameDelay:
+                self.speckFrameIdx = 0
+
+        # draw our specks!
+        deadspecks = []
+        for speck in self.specks:
+            speck.render(model, params, frame)
+            if speck.index > model.numLEDs: # if it's gone through all the indices, it's dead
+                deadspecks.append(speck)
+           
+        for speck in deadspecks:
+            self.specks.remove(speck)
 
 
 
