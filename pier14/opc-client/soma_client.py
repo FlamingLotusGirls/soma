@@ -58,8 +58,8 @@ def main(screen, interval):
         # This is a very handy layer for debugging.  Steps through LEDs in
         # order of frame index in response to a button push, printing the
         # address of the lit LED.
+        #[AddressTestLayer()],
         #[ControlledAddressTestLayer()],
-
         #[TriangleWaveLayer()],
 
         [
@@ -67,31 +67,32 @@ def main(screen, interval):
             DimBrightButtonLayer(),
             SpeckLayer(button=0),
             SpeckLayer(button=1),
-            Repair(),
+            Lightning(),
+            #Repair(),
         ],
 
         [
             MultiplierLayer(ColorWave(model, grayscale=True), ColorWiper(model)),
-            Repair(),
+            #Repair(),
         ],
 
         [
             RandomPhaseLayer(model),
             ColorCycleLayer(0.00003, 0.0001),
             Lightning(),
-            Repair(),
+            #Repair(),
         ],
 
         [
            ColorPaletteBattleLayer(model),
-           Repair(),
+           #Repair(),
         ],
 
         [
             MorseLayer2(["figure", "action", "light", "yang", "synergy", "unity in dual", "SOMA"], ["ground", "intention", "darkness", "yin", "discord", "order from chaos", "FLG"]),
             ColorCycleLayer(0.0003, 0.0005),
             Lightning(),
-            Repair(),
+            #Repair(),
         ],
     ])
 
