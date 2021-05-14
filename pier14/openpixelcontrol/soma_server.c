@@ -32,13 +32,6 @@
 #define CNEW_RTSCTS CRTSCTS
 #endif
 
-// For the old protocol
-#define PROTO_SOF        'S'
-#define PROTO_SOF_LONG   'T'
-#define PROTO_EOF        'E'
-#define PROTO_CMD_SYNC   0x80
-#define PROTO_ADDR_BCAST 0xFF
-
 // For the new protocol
 enum {
     FRAME_END   = 0xDA,
@@ -68,7 +61,6 @@ int num_leds;
 uint16_t port = OPC_DEFAULT_PORT;
 uint32_t baud = 230400; // 115200*2
 char *device, *config;
-int old_proto;
 int fd;
 double sample_time = 5;
 uint32_t frames;
@@ -197,43 +189,6 @@ void serial_write(uint8_t *p, size_t len)
     }
 }
 
-void send_old_short_packet(uint8_t addr, uint8_t command, uint8_t value)
-{
-    uint8_t buf[2048];
-    int buf_len = 0;
-    uint8_t crc = 0;
-
-    crc = crc8_table[crc ^ addr   ];
-    crc = crc8_table[crc ^ command];
-    crc = crc8_table[crc ^ value  ];
-
-    buf[buf_len++] = PROTO_SOF;
-    buf[buf_len++] = addr;
-    buf[buf_len++] = command;
-    buf[buf_len++] = value;
-    buf[buf_len++] = crc;
-    buf[buf_len++] = PROTO_EOF;
-
-    serial_write(buf, buf_len);
-}
-
-void send_old_long_packet(uint8_t addr, uint8_t words, uint8_t *data)
-{
-    uint8_t buf[2048];
-    int buf_len = 0;
-
-    buf[buf_len++] = PROTO_SOF_LONG;
-    buf[buf_len++] = addr;
-    buf[buf_len++] = 0;
-    buf[buf_len++] = words;
-
-    memcpy(buf + buf_len, data, words*4);
-    buf_len += words*4;
-
-    buf[buf_len++] = PROTO_EOF;
-    serial_write(buf, buf_len);
-}
-
 int escape(uint8_t *src, int src_len, uint8_t *dst)
 {
     int dst_len = 0;
@@ -311,10 +266,7 @@ void refresh()
     for (i = 0; i < num_leds; i++) {
         if (first || last_addr + 1 != leds[i].addr) {
             if (!first) {
-                if (old_proto)
-                    send_old_long_packet(base_addr, buf_len/4, buf);
-                else
-                    send_rgblatch(base_addr, buf_len/3, buf);
+                send_rgblatch(base_addr, buf_len/3, buf);
             }
 
             base_addr = leds[i].addr;
@@ -325,20 +277,11 @@ void refresh()
         buf[buf_len++] = leds[i].p.g;
         buf[buf_len++] = leds[i].p.b;
 
-        if (old_proto)
-            buf[buf_len++] = 0;
-
         last_addr = leds[i].addr;
         first = 0;
     }
 
-    if (old_proto) {
-        send_old_long_packet(base_addr, buf_len/4, buf);
-        send_old_short_packet(PROTO_ADDR_BCAST, PROTO_CMD_SYNC, 0);
-    }
-    else {
-        send_rgblatch(base_addr, buf_len/3, buf);
-    }
+    send_rgblatch(base_addr, buf_len/3, buf);
 }
 
 void handler(u8 channel, u16 count, pixel* p)
@@ -435,8 +378,6 @@ int main(int argc, char *argv[])
         { "speed",         required_argument,  NULL, 's' },
         { "file",          required_argument,  NULL, 'f' },
         { "port",          required_argument,  NULL, 'p' },
-        { "old_proto",     no_argument,        NULL, 'o' },
-        { "old_protocol",  no_argument,        NULL, 'o' },
         { 0, 0, 0, 0}
     };
 
@@ -452,7 +393,6 @@ int main(int argc, char *argv[])
             case 'l': device      = optarg;       break;
             case 's': baud        = atoi(optarg); break;
             case 'p': port        = atoi(optarg); break;
-            case 'o': old_proto   = 1;            break;
             case 'n': sample_time = atof(optarg); break;
 
             default:
@@ -473,9 +413,6 @@ int main(int argc, char *argv[])
 
     read_config(config);
     fprintf(stderr, "Using device %s, baud %d\n", device, baud);
-
-    if (old_proto)
-        fprintf(stderr, "Using old protocol\n");
 
     setlinebuf(stdout);
 
