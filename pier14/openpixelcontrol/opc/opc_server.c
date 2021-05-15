@@ -18,6 +18,7 @@ specific language governing permissions and limitations under the License. */
 #include <sys/types.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "opc.h"
 
@@ -149,6 +150,12 @@ u8 opc_receive(opc_source source, opc_handler* handler, u32 timeout_ms) {
     if (received <= 0) {
       /* Connection was closed; wait for more connections. */
       fprintf(stderr, "OPC: Client closed connection\n");
+
+      /* When a client disconnects, reset the first 100 LEDs of the sculpture */
+      char zero[100*3];
+      memset(zero, 0, sizeof(zero));
+      handler(0, sizeof(zero)/3, (pixel*) zero);
+
       close(info->sock);
       info->sock = -1;
       info->listen_sock = opc_listen(info->port);
