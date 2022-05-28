@@ -50,7 +50,7 @@ class PhotoColorsLayer(EffectLayer):
                     continue
 
     def render(self, model, params, frame):
-        if self.lastFrame == None:
+        if self.lastFrame is None:
             for i in xrange(len(frame)):
                frame[i] = self.pixelIter.next()
             self.lastFrame = frame
