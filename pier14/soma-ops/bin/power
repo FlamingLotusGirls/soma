@@ -1,0 +1,110 @@
+#!/usr/bin/perl
+# vim:set ai sw=4 ts=4 sts=4 et:
+
+# CLI utility to remotely control outlets on the Web Power Switch from the
+# BeagleBone Black.  Unfortunately the power switch doesn't have an API, so to
+# query things like description or current state of an outlet we need to parse
+# the HTML from the web UI.
+#
+# The device's manual can be found at https://www.digital-loggers.com/lpc7man.pdf
+
+use Term::ANSIColor;
+use Sys::Hostname;
+
+use strict;
+use warnings;
+
+my $base_url = 'http://admin:pier14@power';
+
+##
+
+my %state;
+my %desc;
+my %desc2num;
+
+sub usage {
+    $0 =~ s,.*/,,;
+    die "Usage: $0 <on|off|cycle|list> <outlet>\n";
+}
+
+# Do an HTTP GET using curl(1).  Using LWP would be cleaner, but on the
+# BeagleBone Black it seems to be taking more than twice as long, so curl it is.
+sub get {
+    my $url = shift;
+    open(my $fd, "-|", "/usr/bin/curl", "-s", "--fail", "--connect-timeout", 3, "--max-time", 3, $url)
+        or die "fork: $!\n";
+    my $out = join "", <$fd>;
+    close $fd;
+    return $out;
+}
+
+# Fetches the list of outlet names
+sub get_names {
+    my $url = "$base_url/index.htm";
+    my $html = get($url) or die "Timeout fetching outlet labels from $url\n";
+
+    while ($html =~ m!
+            ^<tr \s+ bgcolor="\#F4F4F4"><td \s+ align=center>([1-8])</td> \s+
+            ^<td>([^<]*)</td><td> \s+
+            ^<b><font \s+ color=[^>]+>([^<]+)</font></b></td><td>
+        !gmx)
+    {
+        my $num = $1;
+        my $desc = $2;
+        my $state = $3;
+
+        $desc = lc $desc;
+        $desc =~ s/ /-/g;
+
+        $state{$num} = $state;
+        $desc{$num} = $desc;
+        $desc2num{$desc} = $num;
+    }
+
+    my $found = keys %state;
+    die "Oops, I expected to find 8 outlets, but discovered $found?\n"
+        unless $found == 8;
+}
+
+# Issues an ON, OFF, or CYCLE command
+sub cmd {
+    my $cmd = shift;
+    my $num = shift;
+
+    $cmd = "ccl" if $cmd eq "cycle";
+    $cmd = uc $cmd;
+    my $url = "$base_url/outlet?$num=$cmd";
+    get $url;
+}
+
+sub main {
+    my $cmd    = shift;
+    my $outlet = shift;
+
+    usage unless $cmd and $cmd =~ /^(list|on|off|cycle)$/;
+    usage unless $cmd eq "list" or $outlet;
+
+    get_names;
+
+    if ($cmd eq "list") {
+        for my $num (1..8) {
+            my $state = $state{$num};
+            $state = color("green") . $state . color("reset") if $state eq "ON";
+            $state = color("red")   . $state . color("reset") if $state eq "OFF";
+            printf "  %d: %-20s %s\n", $num, $desc{$num}, $state;
+        }
+        exit;
+    }
+
+    $outlet = $desc2num{$outlet} || $outlet;
+
+    die "Unknown outlet: $outlet\n"
+        unless $outlet =~ /^[1-8]$/;
+
+    die "Cowardly refusing to turn myself off\n"
+        if $desc{$outlet} eq hostname and $cmd eq "off";
+
+    cmd $cmd, $outlet;
+}
+
+main @ARGV;

@@ -1,0 +1,15 @@
+#!/bin/bash
+# vim:set ts=4 sw=4 ai et:
+
+DEV=/dev/ttyUSB0
+
+cd /usr/local/soma/pier14/opc-client || exit 1
+
+if ! test -c $DEV
+then
+    echo "Device $DEV does not exist.  Sleeping forever."
+    sleep 1d
+else
+    sleep 3s # Allow the server to start
+    ./soma_client.py
+fi

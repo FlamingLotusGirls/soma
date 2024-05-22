@@ -1,0 +1,10 @@
+[Unit]
+Description=Soma uBrain
+
+[Service]
+ExecStart=/usr/local/bin/ubrain-daemon
+RestartSec=10
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

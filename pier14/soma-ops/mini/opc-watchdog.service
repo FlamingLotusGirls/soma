@@ -1,0 +1,10 @@
+[Unit]
+Description=Soma OPC Watchdog
+
+[Service]
+ExecStart=/usr/local/bin/opc-watchdog
+RestartSec=10
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

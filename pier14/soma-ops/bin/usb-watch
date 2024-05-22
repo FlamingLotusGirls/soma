@@ -1,0 +1,84 @@
+#!/usr/bin/perl
+# vim:set ai sw=4 ts=4 et:
+
+# Look for particular messages in /bin/dmesg that indicate the USB
+# drivers have crapped out again, and issue a reboot.  To be called
+# from cron periodically.  Must be run as root for /sbin/reboot to
+# work.
+#
+# -mct, Fri Nov 27 21:56:22 PST 2015
+
+use Data::Dumper;
+
+use strict;
+use warnings;
+
+my @patterns = (
+    qr/ttyUSB.*failed/i,
+    qr/-+\[ cut here \]-+/,
+    qr/-+\[ end trace/,
+);
+
+open my $fd, "/bin/dmesg |" or die "fork";
+my $num_hits = 0;
+
+while (my $line = <$fd>) {
+    chomp $line;
+    my $uptime = ($line =~ /^\[\s*([\d.]+)\]/)[0];
+
+    if (not $uptime) {
+        print "Could not extract uptime? $line:  ", Dumper $uptime;
+        next;
+    }
+
+    next if ($uptime < 60);
+    my $hit;
+
+    for my $re (@patterns) {
+        if ($line =~ $re) {
+            $hit++;
+        }
+    }
+
+    if ($hit) {
+        print "Hit:  $line\n";
+        $num_hits++;
+    }
+}
+
+if ($num_hits) {
+    print "Found $num_hits bad dmesg lines.  Executing reboot(8) command\n";
+    system "/sbin/shutdown -r +2 USB errors detecting, reboot scheduled"
+}
+
+__DATA__
+[363730.346549] usb 1-1: soma-server timed out on ep0out len=0/0
+[363731.346584] usb 1-1: soma-server timed out on ep0out len=0/0
+[363731.346644] ftdi_sio ttyUSB0: ftdi_set_termios FAILED to set databits/stopbits/parity
+[363732.358339] usb 1-1: soma-server timed out on ep0out len=0/0
+[363732.358398] ftdi_sio ttyUSB0: ftdi_set_termios urb failed to set baudrate
+[363737.370250] usb 1-1: soma-server timed out on ep0out len=0/0
+[363742.370479] usb 1-1: soma-server timed out on ep0out len=0/0
+[363742.370537] ftdi_sio ttyUSB0: urb failed to clear flow control
+[363747.382412] usb 1-1: soma-server timed out on ep0out len=0/0
+[363752.382708] usb 1-1: soma-server timed out on ep0out len=0/0
+[363752.382767] ftdi_sio ttyUSB0: urb failed to clear flow control
+[363753.394791] ------------[ cut here ]------------
+[363753.394870] WARNING: at drivers/usb/musb/musb_host.c:125 musb_h_tx_flush_fifo+0x35/0x58()
+[363753.394900] Could not flush host TX10 fifo: csr: 2003
+[363753.394923] Modules linked in: tun g_multi libcomposite binfmt_misc ftdi_sio usbserial mt7601Usta(O)
+[363753.395079] [<c0010443>] (unwind_backtrace+0x1/0x8a) from [<c002bc57>] (warn_slowpath_common+0x33/0x48)
+[363753.395132] [<c002bc57>] (warn_slowpath_common+0x33/0x48) from [<c002bcbd>] (warn_slowpath_fmt+0x1b/0x22)
+[363753.395183] [<c002bcbd>] (warn_slowpath_fmt+0x1b/0x22) from [<c02f38cd>] (musb_h_tx_flush_fifo+0x35/0x58)
+[363753.395235] [<c02f38cd>] (musb_h_tx_flush_fifo+0x35/0x58) from [<c02f3c03>] (musb_start_urb+0x125/0x4ae)
+[363753.395285] [<c02f3c03>] (musb_start_urb+0x125/0x4ae) from [<c02f42d5>] (musb_urb_enqueue+0x349/0x396)
+[363753.395353] [<c02f42d5>] (musb_urb_enqueue+0x349/0x396) from [<c02e1da7>] (usb_hcd_submit_urb+0x46b/0x50c)
+[363753.395466] [<c02e1da7>] (usb_hcd_submit_urb+0x46b/0x50c) from [<bf8b04e9>] (usb_serial_generic_write_start+0xb2/0x132 [usbserial])
+[363753.395575] [<bf8b04e9>] (usb_serial_generic_write_start+0xb2/0x132 [usbserial]) from [<bf8b08f1>] (usb_serial_generic_write+0x3a/0x52 [usbserial])
+[363753.395669] [<bf8b08f1>] (usb_serial_generic_write+0x3a/0x52 [usbserial]) from [<bf8af039>] (serial_write+0x1c/0x3e [usbserial])
+[363753.395753] [<bf8af039>] (serial_write+0x1c/0x3e [usbserial]) from [<c0253b53>] (n_tty_write+0x1c9/0x252)
+[363753.395810] [<c0253b53>] (n_tty_write+0x1c9/0x252) from [<c0251ce7>] (tty_write+0x10f/0x174)
+[363753.395871] [<c0251ce7>] (tty_write+0x10f/0x174) from [<c00a98e1>] (vfs_write+0x65/0x104)
+[363753.395924] [<c00a98e1>] (vfs_write+0x65/0x104) from [<c00a9ae9>] (sys_write+0x27/0x42)
+[363753.395983] [<c00a9ae9>] (sys_write+0x27/0x42) from [<c000c021>] (ret_fast_syscall+0x1/0x46)
+[363753.396013] ---[ end trace b16ea74ec3aba3a2 ]---

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+cd /home/flg/soma/pier14/openpixelcontrol || exit
+sleep 3
+
+DEV=/dev/ttyUSB0
+
+if ! test -c $DEV
+then
+    echo "Device $DEV does not exist?"
+    exit 
+fi
+
+exec ./soma_server -f config.txt -l $DEV

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd /home/flg/soma/pier14/opc-client || exit
+sleep 3
+exec ./soma_client.py

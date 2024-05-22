@@ -1,0 +1,32 @@
+#!/bin/bash
+# vim:set ai:
+
+### BEGIN INIT INFO
+# Provides:          ubrain-clock
+# Required-Start:    mountdevsubfs
+# Required-Stop:     $local_fs
+# Default-Start:     S
+# X-Start-Before:    checkroot
+# Default-Stop:      0 6
+### END INIT INFO
+
+ubrainclock()
+{
+    case "$1" in
+	start)
+		echo "ubrain clock start"
+		mkdir -p /var/run/soma
+		chmod 1777 /var/run/soma
+		ln -s /tmp/buttonA /var/run/soma/buttonA
+		ln -s /tmp/buttonB /var/run/soma/buttonB
+
+		RTC=$(/usr/local/bin/ubrain-get-time /dev/ttyO2 9600)
+		if test -n "$RTC"
+		then date --utc --set "$RTC"
+		else echo Failed to get clock
+		fi
+	    ;;
+    esac
+}
+
+ubrainclock "$@"

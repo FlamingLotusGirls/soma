@@ -1,0 +1,86 @@
+#!/usr/bin/python -u
+# vi:set ai sw=4 ts=4 et smarttab:
+
+import serial
+import sys
+import re
+import os
+
+button_timeout = 0.3
+serial_timeout = 0.1
+
+buttons = [
+            { 'file':'/tmp/buttonA', 'on':False, 'time':0 },
+            { 'file':'/tmp/buttonB', 'on':False, 'time':0 },
+        ];
+
+def uptime():
+    return float(file("/proc/uptime").read().split(" ")[0])
+
+def button_on(num):
+    print "== On", num
+    if not buttons[num]['on']:
+        file(buttons[num]['file'], "w")
+    buttons[num]['time'] = uptime();
+    buttons[num]['on'] = True
+
+def button_off(num, timeout=False):
+    if timeout:
+        print "== Timing out button", num
+    else:
+        print "== Off", num
+
+    try:
+        os.unlink(buttons[num]['file'])
+    except:
+        pass
+
+    buttons[num]['on'] = False
+
+def check_buttons():
+    now = uptime()
+    for i in range(len(buttons)):
+        if buttons[i]['on'] and now - buttons[i]['time'] > button_timeout:
+            button_off(i, True)
+
+def loop(device, baud):
+    ser = serial.Serial(device, timeout=serial_timeout)
+    ser.baud = baud
+    ser.flushInput()
+
+    while True:
+        check_buttons()
+        line = ser.readline().strip()
+        if not line:
+            continue
+
+        print repr(line)
+
+        match = re.match(r'!ON ([01])', line)
+        if match:
+            num = int(match.groups()[0])
+            button_on(num)
+        match = re.match(r'!OFF ([01])', line)
+        if match:
+            num = int(match.groups()[0])
+            button_off(num)
+
+if __name__ == "__main__":
+
+    if len(sys.argv) > 1:
+        device = sys.argv[1]
+    else:
+        device = "/dev/ttyO2"
+
+    if len(sys.argv) > 2:
+        baud = sys.argv[2]
+    else:
+        baud = 9600
+
+    for i,x in enumerate(buttons):
+        try:
+            os.unlink(buttons[i]['file'])
+        except:
+            pass
+
+    loop(device, baud)

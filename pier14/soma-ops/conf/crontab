@@ -1,0 +1,5 @@
+PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:/usr/local/games:/usr/games
+
+ * *    * * *   nobody  timeout 45s finger @10.14.14.1 &>/dev/null  || true
+30 7    * * *   root    gzip -9 /var/log/{daemon.log,syslog}-20*[0-9]
+*/5 *   * * *   root    usb-watch

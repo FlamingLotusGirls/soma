@@ -1,0 +1,10 @@
+#!/bin/bash
+# vim:set ts=4 sw=4 ai et sts=4:
+
+set -x
+
+if test "$(dmidecode -s system-product-name)" = Macmini4,1
+then
+    # https://serverfault.com/questions/203522/reboot-after-power-failure-for-mac-running-ubuntu-server
+    setpci -v -s 00:03.0 0x7b.b=19
+fi

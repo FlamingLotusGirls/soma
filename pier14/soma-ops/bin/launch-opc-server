@@ -1,0 +1,12 @@
+#!/bin/bash
+# vim:set ts=4 sw=4 ai et:
+
+DEV=/dev/ttyUSB0
+
+if ! test -c $DEV
+then
+    echo "Device $DEV does not exist.  Sleeping forever."
+    sleep 1d
+else
+    soma-server -f /usr/local/soma/pier14/addresses.txt -l $DEV
+fi

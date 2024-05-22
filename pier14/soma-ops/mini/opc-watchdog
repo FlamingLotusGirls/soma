@@ -1,0 +1,31 @@
+#!/usr/bin/perl
+# vim:set ai sw=4 ts=4 et:
+
+use strict;
+use warnings;
+$|++;
+
+open my $fd, "journalctl -u opc-server.service -n 0 -f |" or die "fork: $!\n";
+my $timeout = 60;
+
+$SIG{ALRM} = sub {
+    print "Watchdog triggered\n";
+    system "systemctl restart opc-client.service";
+    alarm $timeout;
+};
+
+alarm $timeout;
+
+print "Startup\n";
+
+while (<$fd>) {
+    if (m! (\d+).(\d+) frames/second! && $1 > 10) {
+        #print "Watchdog satisifed for another $timeout seconds\n";
+        alarm $timeout;
+    }
+}
+
+__DATA__
+Jun 14 19:17:39 macmini launch-opc-server[334]: 40.0 frames/second
+Jun 14 19:17:44 macmini launch-opc-server[334]: 40.2 frames/second
+Jun 14 19:17:49 macmini launch-opc-server[334]: 40.0 frames/second

@@ -1,0 +1,10 @@
+[Unit]
+Description=Soma OPC Client
+
+[Service]
+ExecStart=/usr/local/bin/launch-opc-client
+RestartSec=10
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
