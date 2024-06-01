@@ -120,23 +120,33 @@ def unescape(srcBuf: bytearray) -> bytearray :
     if escapes == 0:
         return srcBuf
 
+    # print(f'unescape, found {escapes} characters to unescape')
+    # print(srcBuf)
+
+    # easiest way is this non-idomatic loop bcause you have to skip forward
+    # in cases where you find an escape byte
     destBuf = bytearray(len(srcBuf)-escapes)
-    e = 0
-    for idx, b in srcBuf:
-        d = 0
-        if (srcBuf[idx] == FRAME_ESC):
-            if (srcBuf[idx+1] == FRAME_TEND):
-                d = FRAME_END
-                e += 1
-            elif (srcBuf[idx+1] == FRAME_TESC):
-                d = FRAME_TESC
-                e += 1
+    srcIdx = 0
+    destIdx = 0
+    while (srcIdx < len(srcBuf)):
+        if (srcBuf[srcIdx] == FRAME_ESC):
+            if (srcBuf[srcIdx+1] == FRAME_TEND):
+                destBuf[destIdx] = FRAME_END
+                destIdx += 1
+                srcIdx += 2
+            elif (srcBuf[srcIdx+1] == FRAME_TESC):
+                destBuf[destIdx] = FRAME_ESC
+                destIdx += 1
+                srcIdx += 2
             else:
                 print(f'unescape error: FRAME_ESC without TEND or TESC')
-                d = FRAME_ESC
+                destBuf[destIdx] = srcBuf[srcIdx]
+                srcIdx += 1
+                destIdx += 1
         else:
-            d = srcBuf[idx]
-        destBuf[idx-e] = d
+            destBuf[destIdx] = srcBuf[srcIdx]
+            srcIdx += 1
+            destIdx += 1
 
     return( bytes(destBuf) )
 
@@ -155,7 +165,7 @@ def escape(srcBuf: bytes) -> bytes :
 
     destBuf = bytearray(len(srcBuf)+escapes)
     e = 0
-    for idx, b in srcBuf:
+    for idx, b in enumerate(srcBuf):
         if (srcBuf[idx] == FRAME_END):
             destBuf[idx+e] = FRAME_ESC
             destBuf[idx+e+1] = FRAME_TEND
@@ -173,25 +183,33 @@ def escape(srcBuf: bytes) -> bytes :
 
 def packet(address: int, operation: int, buf: bytes ) -> bytes :
 
-    p = bytearray(3)
+    p = bytearray(2)
     # this frame end at the front seems either wrong or superfulous?
-    p[0] = FRAME_END
-    p[1] = address
-    p[2] = operation
+    p[0] = address
+    p[1] = operation
 
+    # NB: it is necessary to CRC first and then escape, because the CRC packet
+    # itself might need escaping. The easy code (this) results in an extra copy.
+    # there's a more efficient way to write this, but not bothered at the moment
     if buf is not None:
-        p +=  escape(buf) 
-
+        p += buf
 
     # calculate CRC. hard to tell here what the CRC covers, do we also add address and opertion?
     # good news, I think I have a working example....
     crc = 0
-    for b in p[1:] :
+    for b in p :
         crc = crc8_table[ b ^ crc ]
     p.append( crc )
-    p.append( FRAME_END )
 
-    return bytes(p)
+    # now we escape... 
+    escape_bytes = escape(p)
+
+    r_ba = bytearray(len(escape_bytes) + 2)
+    r_ba[0] = FRAME_END
+    r_ba[1:-2] = escape_bytes
+    r_ba[-1] = FRAME_END
+
+    return bytes(r_ba)
 
 def validate_packet(ba : bytearray ) -> bool :
 
@@ -315,6 +333,7 @@ if __name__ == "__main__":
                     if len(ba) == 0:
                         print(" zero length frame ")
                     else:
+                        # print( 'unescaping ', ba)
                         ba = unescape(ba)
                         validate_packet(ba)
                     break
